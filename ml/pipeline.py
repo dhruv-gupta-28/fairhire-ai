@@ -1,205 +1,212 @@
 """
-ML Pipeline for FairHire — FIXED + PRODUCTION READY
+ML Pipeline for FairHire — Fully Generic and Intelligent
 """
-
 import pandas as pd
 import numpy as np
 from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, OneHotEncoder, LabelEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.impute import SimpleImputer
+from sklearn.pipeline import Pipeline
+import logging
 import joblib
 from config import MODEL_FOLDER
-import logging
 
 logger = logging.getLogger(__name__)
-
 
 class MLPipeline:
     def __init__(self, random_state=42):
         self.random_state = random_state
-        self.model = None
-        self.scaler = None
-        self.ohe_columns = None
-        self.model_path = MODEL_FOLDER / "model.joblib"
-        self.scaler_path = MODEL_FOLDER / "scaler.joblib"
-        self.ohe_path = MODEL_FOLDER / "ohe_columns.joblib"
-        self._load_if_exists()
 
-    def _load_if_exists(self):
-        try:
-            if self.model_path.exists():
-                self.model = joblib.load(self.model_path)
-                logger.info("Model loaded from disk")
-            if self.scaler_path.exists():
-                self.scaler = joblib.load(self.scaler_path)
-            if self.ohe_path.exists():
-                self.ohe_columns = joblib.load(self.ohe_path)
-                logger.info("Scaler and OHE columns loaded")
-        except Exception as e:
-            logger.warning(f"Failed to load model components: {e}")
-            self.model = None
-            self.scaler = None
-            self.ohe_columns = None
+    def detect_target(self, df: pd.DataFrame) -> str:
+        # Priority 1: Name match
+        target_keywords = ["target", "label", "outcome", "decision", "hired", "approved", "income", "income_binary"]
+        for col in df.columns:
+            if str(col).lower() in target_keywords:
+                return col
+        
+        # Priority 2: Low unique values (<10)
+        potential_targets = []
+        for col in df.columns:
+            n_unique = df[col].nunique()
+            if 1 < n_unique < 10:
+                potential_targets.append(col)
+        if potential_targets:
+            return potential_targets[-1] # Usually at the end
+            
+        # Priority 3: Last categorical column
+        categorical_cols = df.select_dtypes(include=['object', 'category']).columns
+        if len(categorical_cols) > 0:
+            return categorical_cols[-1]
+            
+        return df.columns[-1]
 
-    # ---------------- PREPROCESS ---------------- #
-    def _preprocess(self, df_input, fit=True):
+    def _detect_sensitive_group(self, df: pd.DataFrame, keywords: list) -> str:
+        for col in df.columns:
+            for kw in keywords:
+                if kw in str(col).lower():
+                    return col
+        return None
+
+    def compute_fairness(self, test_df: pd.DataFrame, y_pred, sensitive_cols: dict):
+        fairness_report = {}
+        for key, col in sensitive_cols.items():
+            if not col or col not in test_df.columns:
+                continue
+            
+            groups = {}
+            rates = []
+            test_df_copy = test_df.copy()
+            test_df_copy['y_pred'] = y_pred
+            
+            for group, subset in test_df_copy.groupby(col):
+                rate = subset['y_pred'].mean()
+                groups[str(group)] = {"rate": float(rate), "count": int(len(subset))}
+                rates.append(rate)
+                
+            if rates:
+                max_r = max(rates)
+                min_r = min(rates)
+                fairness_report[key] = {
+                    "groups": groups,
+                    "disparity": float(max_r - min_r),
+                    "ratio": float(min_r / max_r) if max_r > 0 else 0.0
+                }
+        return fairness_report
+
+    def train(self, df_input: pd.DataFrame):
         df = df_input.copy()
 
-        # ---- EDA: DROP DUPLICATES ----
+        # EDA: Remove duplicates
         df = df.drop_duplicates()
 
-        # ---- EDA: CLEAN STRINGS & IMPUTE CATEGORICAL ----
+        # Identify target
+        target_col = self.detect_target(df)
+        if not target_col:
+            raise ValueError("No target column could be detected.")
+
+        # Drop NaNs in target
+        df = df.dropna(subset=[target_col])
+        if df[target_col].nunique() < 2:
+            raise ValueError(f"Target column '{target_col}' has fewer than 2 classes. At least 2 distinct classes are required.")
+
+        # Encode target
+        le = LabelEncoder()
+        y = le.fit_transform(df[target_col].astype(str))
+        
+        # Drop ID and target columns from X
+        cols_to_drop = [target_col]
         for col in df.columns:
-            if df[col].dtype == object or df[col].dtype == str:
-                # Standardization
-                df[col] = df[col].astype(str).str.strip().str.lower()
-                # Missing Value Handling
-                df[col] = df[col].replace({'nan': np.nan, 'null': np.nan, '': np.nan, 'none': np.nan})
-                if df[col].isnull().any():
-                    mode_val = df[col].mode()
-                    if not mode_val.empty:
-                        df[col] = df[col].fillna(mode_val[0])
-                    else:
-                        df[col] = df[col].fillna('unknown')
+            if "id" in str(col).lower() and len(df[col].unique()) == len(df):
+                cols_to_drop.append(col)
+        
+        X = df.drop(columns=cols_to_drop, errors='ignore')
 
-        # ---- EDA: IMPUTE NUMERICAL ----
-        numeric_cols = ['age', 'education_num', 'hours_per_week']
-        for col in numeric_cols:
-            if col in df.columns:
-                df[col] = pd.to_numeric(df[col], errors='coerce')
-                # Missing Value Handling (Mean)
-                if df[col].isnull().any():
-                    mean_val = df[col].mean()
-                    df[col] = df[col].fillna(mean_val if not pd.isna(mean_val) else 0)
+        # EDA: Missing values and constant cols
+        num_rows = len(X)
+        final_cols = []
+        for col in X.columns:
+            missing_ratio = X[col].isnull().sum() / num_rows
+            if missing_ratio > 0.40:
+                continue
+            if X[col].nunique() <= 1:
+                continue
+            final_cols.append(col)
+        
+        X = X[final_cols]
+        if X.empty:
+            raise ValueError("No valid features remaining after purging empty or constant columns.")
 
-        # ---- DROP USELESS ----
-        drop_cols = ['fnlwgt', 'native_country', 'capital_gain', 'capital_loss']
-        df = df.drop(columns=[c for c in drop_cols if c in df.columns], errors='ignore')
+        # Feature separation
+        numeric_features = []
+        categorical_features = []
+        
+        for col in X.columns:
+            if pd.api.types.is_numeric_dtype(X[col]):
+                numeric_features.append(col)
+            else:
+                categorical_features.append(col)
+                X[col] = X[col].astype(str).str.strip().str.lower()
+                X[col] = X[col].replace({'nan': np.nan, 'none': np.nan, 'null': np.nan, '': np.nan})
 
-        # ---- REMOVE TARGET ----
-        df = df.drop(columns=['income', 'income_binary', 'target'], errors='ignore')
+        # Preprocessing Pipeline
+        transformers = []
+        if numeric_features:
+            numeric_transformer = Pipeline(steps=[
+                ('imputer', SimpleImputer(strategy='mean')),
+                ('scaler', StandardScaler())
+            ])
+            transformers.append(('num', numeric_transformer, numeric_features))
+            
+        if categorical_features:
+            categorical_transformer = Pipeline(steps=[
+                ('imputer', SimpleImputer(strategy='most_frequent')),
+                ('onehot', OneHotEncoder(handle_unknown='ignore', sparse_output=False))
+            ])
+            transformers.append(('cat', categorical_transformer, categorical_features))
 
-        # ---- ENCODING ----
-        categorical_cols = [
-            'workclass', 'education', 'marital_status',
-            'occupation', 'relationship', 'race', 'sex'
-        ]
-        categorical_cols = [c for c in categorical_cols if c in df.columns]
+        preprocessor = ColumnTransformer(transformers=transformers)
 
-        df_encoded = pd.get_dummies(df, columns=categorical_cols, drop_first=False)
+        # Model Strategy
+        model = LogisticRegression(class_weight="balanced", max_iter=3000)
+        clf = Pipeline(steps=[('preprocessor', preprocessor), ('classifier', model)])
 
-        # ---- ALIGN ----
-        if fit:
-            self.ohe_columns = df_encoded.columns.tolist()
-        else:
-            for col in self.ohe_columns:
-                if col not in df_encoded.columns:
-                    df_encoded[col] = 0
-            df_encoded = df_encoded[self.ohe_columns]
-
-        # ---- SCALE ----
-        if fit:
-            self.scaler = StandardScaler()
-            df_encoded[numeric_cols] = self.scaler.fit_transform(df_encoded[numeric_cols])
-        else:
-            df_encoded[numeric_cols] = self.scaler.transform(df_encoded[numeric_cols])
-
-        return df_encoded.astype(float)
-
-    # ---------------- TRAIN ---------------- #
-    def train(self, df_input):
-        df = df_input.copy()
-
-        # ---- TARGET ----
-        if 'income_binary' in df.columns:
-            df['target'] = df['income_binary']
-        elif 'income' in df.columns:
-            df['target'] = df['income'].apply(lambda x: 1 if '>50k' in str(x).lower() else 0)
-        else:
-            raise ValueError("Target column missing. Ensure 'income' or 'income_binary' exists.")
-
-        if df['target'].nunique() < 2:
-            raise ValueError("Dataset requires at least two distinct target classes (e.g. both >50k and <=50k outcomes) to train the fairness model, but only one homogeneous class was found.")
-
-        # ---- SPLIT ----
-        train_df, test_df = train_test_split(
-            df,
-            test_size=0.2,
-            random_state=self.random_state,
-            stratify=df['target']
+        # Split
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.2, random_state=self.random_state, stratify=y
         )
 
-        # ---- PREPROCESS ----
-        X_train = self._preprocess(train_df, fit=True)
-        X_test = self._preprocess(test_df, fit=False)
+        try:
+            clf.fit(X_train, y_train)
+        except Exception as e:
+            logger.error(f"Logistic Regression failed, falling back to Random Forest: {e}")
+            model = RandomForestClassifier(class_weight="balanced", random_state=self.random_state)
+            clf = Pipeline(steps=[('preprocessor', preprocessor), ('classifier', model)])
+            clf.fit(X_train, y_train)
 
-        y_train = train_df['target'].values
-        y_test = test_df['target'].values
+        logger.info("Model trained successfully.")
 
-        # ---- MODEL ----
-        self.model = LogisticRegression(
-            max_iter=3000,
-            class_weight='balanced'
-        )
+        # Predict
+        y_pred = clf.predict(X_test)
+        if hasattr(clf.named_steps['classifier'], "predict_proba"):
+            y_pred_proba = clf.predict_proba(X_test)[:, 1]
+        else:
+            y_pred_proba = y_pred
 
-        self.model.fit(X_train, y_train)
-
-        # ---- PREDICT ----
-        y_pred = self.model.predict(X_test)
-        y_pred_proba = self.model.predict_proba(X_test)[:, 1]
-
-        # ---- METRICS ----
+        # Metrics
+        y_test_classes = len(np.unique(y_test))
         metrics = {
-            "accuracy": round(float(accuracy_score(y_test, y_pred)), 4),
-            "precision": round(float(precision_score(y_test, y_pred, zero_division=0)), 4),
-            "recall": round(float(recall_score(y_test, y_pred, zero_division=0)), 4),
-            "f1": round(float(f1_score(y_test, y_pred, zero_division=0)), 4),
-            "auc": round(float(roc_auc_score(y_test, y_pred_proba)), 4),
+            "accuracy": float(accuracy_score(y_test, y_pred)),
+            "precision": float(precision_score(y_test, y_pred, zero_division=0, average='macro' if y_test_classes > 2 else 'binary')),
+            "recall": float(recall_score(y_test, y_pred, zero_division=0, average='macro' if y_test_classes > 2 else 'binary')),
+            "f1_score": float(f1_score(y_test, y_pred, zero_division=0, average='macro' if y_test_classes > 2 else 'binary')),
+            "roc_auc": float(roc_auc_score(y_test, y_pred_proba) if y_test_classes == 2 else 0.0)
         }
 
-        # ---- ATTACH PRED ----
-        test_df = test_df.reset_index(drop=True)
-        test_df['y_pred'] = y_pred
-        test_df['y_pred_proba'] = y_pred_proba
-
-        logger.info("Model trained successfully")
-
-        # Save model components
-        try:
-            joblib.dump(self.model, self.model_path)
-            joblib.dump(self.scaler, self.scaler_path)
-            joblib.dump(self.ohe_columns, self.ohe_path)
-            logger.info("Model saved to disk")
-        except Exception as e:
-            logger.error(f"Failed to save model: {e}")
+        # Fairness
+        sensitive_cols = {
+            "gender": self._detect_sensitive_group(X, ["gender", "sex", "male", "female"]),
+            "race": self._detect_sensitive_group(X, ["race", "ethnicity"]),
+            "age": self._detect_sensitive_group(X, ["age", "dob", "years"])
+        }
+        
+        fairness = self.compute_fairness(X_test, y_pred, sensitive_cols)
 
         return {
+            "metrics": metrics,
+            "target_column": target_col,
+            "feature_summary": {
+                "num_features": len(numeric_features),
+                "cat_features": len(categorical_features)
+            },
+            "fairness": fairness,
+            "predictions_sample": y_pred[:10].tolist(),
+            "class_distribution": {str(k): int(v) for k, v in pd.Series(y).value_counts().items()},
+            "raw_test_df": X_test.copy(),
             "y_true": y_test,
             "y_pred": y_pred,
-            "y_pred_proba": y_pred_proba,
-            "metrics": metrics,
-            "test_df": test_df
+            "y_pred_proba": y_pred_proba
         }
-
-    # ---------------- SAVE ---------------- #
-    def save_model(self, name="model.joblib"):
-        if self.model is None:
-            raise ValueError("No model")
-
-        path = MODEL_FOLDER / name
-        joblib.dump(self.model, path)
-        return str(path)
-
-    # ---------------- LOAD ---------------- #
-    def load_model(self, path):
-        self.model = joblib.load(path)
-
-    # ---------------- PREDICT ---------------- #
-    def predict(self, df):
-        X = self._preprocess(df, fit=False)
-        return self.model.predict(X)
-
-    def predict_proba(self, df):
-        X = self._preprocess(df, fit=False)
-        return self.model.predict_proba(X)[:, 1]
