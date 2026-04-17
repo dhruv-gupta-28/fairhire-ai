@@ -65,7 +65,7 @@ def validate_file(file, allowed_extensions, max_size=MAX_FILE_SIZE):
 # ---------------- STATIC HOSTING (REACT) ----------------
 FRONTEND_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'frontend-react', 'build')
 
-app = Flask(__name__, static_folder=FRONTEND_FOLDER, static_url_path='/')
+app = Flask(__name__)
 # Restrict CORS to localhost and future prod URL
 CORS(app, supports_credentials=True, origins=["http://localhost:3000", "http://127.0.0.1:3000", "https://fairhire-prod-url.ai"])
 
@@ -73,10 +73,10 @@ CORS(app, supports_credentials=True, origins=["http://localhost:3000", "http://1
 @app.route('/<path:path>')
 def serve(path):
     from flask import send_from_directory
-    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
-        return send_from_directory(app.static_folder, path)
+    if path != "" and os.path.exists(os.path.join(FRONTEND_FOLDER, path)):
+        return send_from_directory(FRONTEND_FOLDER, path)
     else:
-        return send_from_directory(app.static_folder, 'index.html')
+        return send_from_directory(FRONTEND_FOLDER, 'index.html')
 
 # ---------------- JWT ----------------
 init_jwt(app)
