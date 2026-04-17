@@ -11,11 +11,11 @@ FairHire AI is a state-of-the-art SaaS application built to enforce equitable hi
 
 ## 🌟 Key Features
 
-### 1. **Automated ML Bias Detection**
-Upload candidate CSV datasets and immediately leverage `Scikit-learn` algorithms calculating absolute bias metrics across gender, age, race, and education parameters. High-severity violations automatically trigger strict warnings utilizing Gemini inferences summarizing deep operational bottlenecks into professional multi-paragraph insights.
+### 1. **V3 Universal ML Fairness Engine & SHAP Explainability**
+Upload **any arbitrary CSV file**, and FairHire AI will structurally detect your target demographic natively! It autonomously scrubs missing components, scales categorical algorithms using advanced `sklearn` ColumnTransformers, and bridges raw matrix variances straight into **SHAP (Shapley Additive Explanations)**! See *exactly* what factors mathematically drove an applicant's success visually (e.g. `education: 0.32`).
 
-### 2. **Generative Candidate Analysis**
-The system intelligently bridges unstructured Word (`.docx`) and Acrobat (`.pdf`) resume variants—extracting skills natively and mapping them directly to strict tier scoring algorithms. The integrated **Gemini 2.0 Flash** model natively constructs 3-paragraph executive summaries of every uploaded candidate profile dynamically!
+### 2. **Generative Candidate Analysis (Gemini 3.1 Pro)**
+The system intelligently bridges unstructured Word (`.docx`) and Acrobat (`.pdf`) resume variants—extracting skills natively and mapping them directly to strict tier scoring algorithms. The integrated **Google Gemini 3.1 Pro** model natively constructs pristine executive demographic summaries dynamically!
 
 ### 3. **Intelligent Job Matching**
 FairHire AI maps isolated candidate JSON variables structurally across real-world enterprise architectures leveraging the Adzuna intelligence API—linking remote jobs directly to users based on calculated score constraints and location targeting parameters. 
@@ -31,8 +31,8 @@ FairHire AI maps isolated candidate JSON variables structurally across real-worl
 
 * **Frontend:** React (Context API, Lucide Icons, Axios Interceptors)
 * **Backend:** Flask / Python 3 / Flask-JWT-Extended
-* **Machine Learning:** `scikit-learn` (Fairness scoring), `pandas`
-* **Generative NLP:** Google GenAI SDK (Gemini 2.0 Flash)
+* **Machine Learning:** `scikit-learn` (Generic AI mapping), `shap` (Feature Explainability), `pandas`
+* **Generative NLP:** Google GenAI SDK (Gemini 3.1 Pro Preview)
 * **Database Platform:** MongoDB Atlas
 
 ---
