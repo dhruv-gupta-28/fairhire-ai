@@ -46,6 +46,9 @@ def analyze_bias(file_path, user_id=None, save_to_db=False):
 
     try:
         df = pd.read_csv(file_path)
+        if df.empty:
+            raise ValueError("The uploaded CSV file is completely empty.")
+            
         if not set(required_columns).issubset(df.columns):
             df = pd.read_csv(file_path, names=required_columns, header=None)
     except Exception as e:

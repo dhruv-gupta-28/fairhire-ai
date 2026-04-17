@@ -59,6 +59,9 @@ class MLPipeline:
 
         df = df.dropna()
 
+        if len(df) == 0:
+            raise ValueError("Data parse failure: All rows were corrupted or dropped. Please ensure 'age', 'education_num', and 'hours_per_week' are strictly numeric figures without strings or NaNs.")
+
         # ---- DROP USELESS ----
         drop_cols = ['fnlwgt', 'native_country', 'capital_gain', 'capital_loss']
         df = df.drop(columns=[c for c in drop_cols if c in df.columns], errors='ignore')
