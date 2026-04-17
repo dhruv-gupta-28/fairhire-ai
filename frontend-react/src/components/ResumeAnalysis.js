@@ -59,11 +59,9 @@ const ResumeAnalysis = () => {
     formData.append("file", file);
 
     try {
-      const token = localStorage.getItem("token");
-
       const response = await axios.post("/resume/analyze", formData, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
         },
       });
 

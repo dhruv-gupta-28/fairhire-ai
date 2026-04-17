@@ -54,12 +54,9 @@ const JobMatching = () => {
     formData.append("limit", jobSearch.limit);
 
     try {
-      const token = localStorage.getItem("token");
-
       const response = await axios.post("/job/match", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
         },
       });
 

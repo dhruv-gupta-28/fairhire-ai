@@ -40,10 +40,7 @@ const Profile = () => {
 
   const fetchProfile = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get("/profile", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get("/profile");
 
       const data = response.data;
       setProfile({
@@ -76,7 +73,6 @@ const Profile = () => {
     setSuccess("");
 
     try {
-      const token = localStorage.getItem("token");
       const payload = {
         ...profile,
         age: profile.age ? parseInt(profile.age, 10) : null,
@@ -85,9 +81,7 @@ const Profile = () => {
           : [],
       };
 
-      await axios.put("/profile", payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.put("/profile", payload);
 
       setSuccess("Profile updated successfully");
       setEditing(false);

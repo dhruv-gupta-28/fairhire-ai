@@ -21,11 +21,7 @@ const History = () => {
 
   const fetchHistory = async () => {
     try {
-      const token = localStorage.getItem("token");
-
-      const res = await axios.get("/history", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.get("/history");
 
       setHistory(res.data);
     } catch (error) {

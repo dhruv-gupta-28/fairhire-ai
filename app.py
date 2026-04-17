@@ -32,6 +32,20 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+def cleanup_orphaned_uploads():
+    try:
+        cutoff = time.time() - 3600
+        for folder in [UPLOAD_FOLDER, REPORT_FOLDER]:
+            if not os.path.exists(folder):
+                continue
+            for filename in os.listdir(folder):
+                file_path = os.path.join(folder, filename)
+                if os.path.isfile(file_path) and file_path.lower().endswith(('.csv', '.pdf', '.docx')):
+                    if os.path.getmtime(file_path) < cutoff:
+                        os.remove(file_path)
+    except Exception as e:
+        logger.error(f"Garbage collector failure: {e}")
+
 def validate_file(file, allowed_extensions, max_size=MAX_FILE_SIZE):
     if not file:
         return {"valid": False, "error": "No file provided"}
@@ -182,6 +196,7 @@ def delete_profile():
 def analyze():
     from flask_jwt_extended import get_jwt_identity
     user_id = get_jwt_identity()
+    cleanup_orphaned_uploads()
 
     if not check_rate_limit(user_id, 'analyze'):
         return jsonify({"error": "Rate limit exceeded"}), 429
@@ -221,6 +236,7 @@ def analyze():
 @app.route('/report', methods=['POST'])
 @user_required
 def report():
+    cleanup_orphaned_uploads()
     user_id = get_jwt_identity()
 
     data = request.get_json()
@@ -283,6 +299,7 @@ def firewall():
 @app.route('/resume/analyze', methods=['POST'])
 @user_required
 def resume_route():
+    cleanup_orphaned_uploads()
     if 'file' not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
 
@@ -321,12 +338,15 @@ def resume_route():
     finally:
         if os.path.exists(file_path):
             os.remove(file_path)
+        import gc
+        gc.collect()
 
 
 # ---------------- JOB MATCH ----------------
 @app.route('/job/match', methods=['POST'])
 @user_required
-def job_match():
+def job_matcher_route():
+    cleanup_orphaned_uploads()
     if 'file' not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
 

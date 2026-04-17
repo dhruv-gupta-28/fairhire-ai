@@ -48,11 +48,9 @@ const Analysis = () => {
     formData.append("file", file);
 
     try {
-      const token = localStorage.getItem("token");
-
       const response = await axios.post("/analyze", formData, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
         },
       });
 
@@ -70,13 +68,8 @@ const Analysis = () => {
     setReportLoading(true);
 
     try {
-      const token = localStorage.getItem("token");
-
       const response = await axios.post("/report", results, {
-        responseType: "blob",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        responseType: "blob"
       });
 
       const blob = new Blob([response.data]);
