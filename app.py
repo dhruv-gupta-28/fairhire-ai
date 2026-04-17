@@ -65,7 +65,7 @@ def validate_file(file, allowed_extensions, max_size=MAX_FILE_SIZE):
 # ---------------- STATIC HOSTING (REACT) ----------------
 FRONTEND_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'frontend-react', 'build')
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/react_static_bypass', static_folder=FRONTEND_FOLDER)
 # Restrict CORS to localhost and future prod URL
 CORS(app, supports_credentials=True, origins=["http://localhost:3000", "http://127.0.0.1:3000", "https://fairhire-prod-url.ai"])
 
