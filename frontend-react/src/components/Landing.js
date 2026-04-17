@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Shield, BarChart3, FileText, Target } from "lucide-react";
 

@@ -5,7 +5,6 @@ import {
   BarChart3,
   FileText,
   Briefcase,
-  History,
   TrendingUp,
   Shield,
   Activity,
@@ -27,8 +26,6 @@ const Dashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const token = localStorage.getItem("token");
-
       const response = await axios.get("/history", { withCredentials: true });
       const historyData = response.data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
