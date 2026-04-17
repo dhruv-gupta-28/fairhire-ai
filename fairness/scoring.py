@@ -45,9 +45,9 @@ class FairnessScore:
         if gap < 0.1:
             return gap * 0.5
         elif gap < 0.2:
-            return gap
+            return gap * 1.5
         else:
-            return min(1.0, gap ** 1.5)
+            return min(1.0, gap * 3.0)
 
     def compute_metric_gaps(self):
         all_metrics = self._get_all_metrics()
@@ -88,7 +88,7 @@ class FairnessScore:
             metric_aggregates['calibration'].append(attr_gaps['calibration_gap'])
 
         avg_gaps = {
-            k: float(np.mean(v)) if v else 0.0
+            k: float(np.max(v)) if v else 0.0
             for k, v in metric_aggregates.items()
         }
 
