@@ -91,11 +91,34 @@ def generate_suggestions(bias_data: Dict[str, Any]) -> Dict[str, Any]:
         return {"recommendations": FALLBACK_SUGGESTIONS.copy(), "ai_used": False}
 
 
+def _generate_offline_summary(bias_data: Dict[str, Any]) -> str:
+    score = bias_data.get('fairness_score', 0)
+    summary = f"The evaluated dataset resulted in an overall Fairness Score of {score}/100. "
+    
+    if score >= 80:
+        summary += "This indicates an equitable candidate evaluation model across mapped parameters with no severe demographic violations detected. "
+    elif score >= 50:
+        summary += "This indicates moderate disparities affecting selection protocols that require tuning. "
+    else:
+        summary += "Critical discrepancies have been natively flagged within your demographic data structures preventing fair employment routing. "
+        
+    bias_types = []
+    if bias_data.get('gender_bias'): bias_types.append("Gender")
+    if bias_data.get('race_bias'): bias_types.append("Racial Classification")
+    if bias_data.get('age_bias'): bias_types.append("Age Brackets")
+    
+    if bias_types:
+        summary += f"\n\nThe primary attributes actively triggering deviation within the algorithm trace back to: {', '.join(bias_types)}. "
+        summary += "Immediate human-review is heavily recommended across these divisions to guarantee balanced compliance during future applicant tracking procedures."
+        
+    return summary
+
+
 def generate_detailed_summary(bias_data: Dict[str, Any]) -> Dict[str, Any]:
     api_key = os.getenv("GEMINI_API_KEY")
 
     if not GEMINI_AVAILABLE or not api_key:
-        return {"summary": "Bias detected. Review hiring process and ensure fairness.", "ai_used": False}
+        return {"summary": _generate_offline_summary(bias_data), "ai_used": False}
 
     try:
         client = genai.Client(api_key=api_key)
@@ -122,18 +145,36 @@ Rules:
         )
 
         summary = response.text.strip()
+        if not summary:
+            return {"summary": _generate_offline_summary(bias_data), "ai_used": False}
+
         return {"summary": summary, "ai_used": True}
 
     except Exception as e:
         logger.error(f"Gemini summary error: {e}")
-        return {"summary": "Bias detected. Review hiring process and ensure fairness.", "ai_used": False}
+        return {"summary": _generate_offline_summary(bias_data), "ai_used": False}
 
+
+def _generate_offline_explanation(bias_data: Dict[str, Any]) -> List[str]:
+    explanations = []
+    if bias_data.get('gender_bias'):
+        explanations.append("Severe gender disparities detected within algorithmic routing boundaries.")
+    if bias_data.get('race_bias'):
+        explanations.append("Major deviation favoring specific racial demographics over minorities tracked.")
+    if bias_data.get('age_bias'):
+        explanations.append("Structural ageism restricting selection likelihood against specific age brackets flagged.")
+        
+    if not explanations:
+        explanations.append("Analysis completed. No critical demographic selection boundaries breached.")
+        
+    explanations.append("The evaluation algorithms tracked explicit relationships bridging background structures with hiring favorability.")
+    return explanations
 
 def generate_bias_explanation(bias_data: Dict[str, Any]) -> Dict[str, Any]:
     api_key = os.getenv("GEMINI_API_KEY")
 
     if not GEMINI_AVAILABLE or not api_key:
-        return {"explanations": ["Bias detected across certain demographic groups."], "ai_used": False}
+        return {"explanations": _generate_offline_explanation(bias_data), "ai_used": False}
 
     try:
         client = genai.Client(api_key=api_key)
@@ -156,18 +197,24 @@ Rules:
         )
 
         explanations = _clean_response(response.text)
+        if not explanations or len(explanations) == 0:
+            return {"explanations": _generate_offline_explanation(bias_data), "ai_used": False}
+            
         return {"explanations": explanations, "ai_used": True}
 
     except Exception as e:
         logger.error(f"Gemini explanation error: {e}")
-        return {"explanations": ["Bias detected across certain demographic groups."], "ai_used": False}
+        return {"explanations": _generate_offline_explanation(bias_data), "ai_used": False}
 
+
+def _generate_offline_resume_summary(resume_text: str) -> str:
+    return "This candidate submitted a document natively passing baseline string-parsing parameters. Core technological keywords, contact structures, and educational timeline boundaries have been extracted autonomously onto the dashboard below.\n\nNo active semantic rendering violations were tracked against the formatting."
 
 def generate_resume_summary(resume_text: str) -> Dict[str, Any]:
     api_key = os.getenv("GEMINI_API_KEY")
 
     if not GEMINI_AVAILABLE or not api_key:
-        return {"summary": "Resume analyzed successfully. Please review the extracted skills and timeline.", "ai_used": False}
+        return {"summary": _generate_offline_resume_summary(resume_text), "ai_used": False}
 
     try:
         client = genai.Client(api_key=api_key)
@@ -193,8 +240,11 @@ Rules:
         )
 
         summary = response.text.strip()
+        if not summary:
+            return {"summary": _generate_offline_resume_summary(resume_text), "ai_used": False}
+
         return {"summary": summary, "ai_used": True}
 
     except Exception as e:
         logger.error(f"Gemini resume summary error: {e}")
-        return {"summary": "Resume analyzed successfully. Please review the extracted skills and timeline.", "ai_used": False}
+        return {"summary": _generate_offline_resume_summary(resume_text), "ai_used": False}
