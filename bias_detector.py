@@ -39,6 +39,9 @@ def analyze_bias(file_path, user_id=None, save_to_db=False):
 
     pipeline = MLPipeline(random_state=42)
     pipeline_result = pipeline.train(df)
+    
+    if pipeline_result.get("failed"):
+        raise ValueError(f"Pipeline Analysis Failed Natively: {pipeline_result.get('error')}")
 
     # Re-map organic fairness data to React Dashboard legacy schema implicitly!
     gender_bias = {}
@@ -52,14 +55,8 @@ def analyze_bias(file_path, user_id=None, save_to_db=False):
     age_bias = {}
     if "age" in pipeline_result["fairness"]:
         age_bias = {k: v["rate"] for k, v in pipeline_result["fairness"]["age"]["groups"].items()}
-
-    # Exponential fairness mapping logic. Greater max disparity drops the score from 100 heavily.
-    max_disparity = 0.0
-    for attr, stats in pipeline_result["fairness"].items():
-        if stats["disparity"] > max_disparity:
-            max_disparity = stats["disparity"]
             
-    overall_score = round(max(0.0, 100.0 - (max_disparity * 200)), 2)
+    overall_score = pipeline_result["bias_summary"]["fairness_score"]
 
     bias_payload = {
         "fairness_score": overall_score,
@@ -79,6 +76,7 @@ def analyze_bias(file_path, user_id=None, save_to_db=False):
         "columns": df.columns.tolist()
     }
 
+    # Merging the new SHAP architecture directly into the response payload mapping
     result = {
         "model_metrics": pipeline_result["metrics"],
         "fairness_score": overall_score,
@@ -94,7 +92,7 @@ def analyze_bias(file_path, user_id=None, save_to_db=False):
         "dataset_info": dataset_info,
         "advanced_fairness": {
             "overall_score": overall_score,
-            "severity": "CRITICAL" if overall_score < 60 else "WARNING" if overall_score < 80 else "ACCEPTABLE",
+            "severity": pipeline_result["bias_summary"]["overall_severity"],
             "metric_gaps": {},
             "weights": {},
             "thresholds": {},
@@ -102,9 +100,12 @@ def analyze_bias(file_path, user_id=None, save_to_db=False):
         },
         "flagged_metrics": pipeline_result["fairness"],
         "target_column": pipeline_result["target_column"],
+        "target_confidence": pipeline_result["target_confidence"],
         "feature_summary": pipeline_result["feature_summary"],
         "predictions_sample": pipeline_result["predictions_sample"],
-        "class_distribution": pipeline_result["class_distribution"]
+        "class_distribution": pipeline_result["class_distribution"],
+        "feature_importance": pipeline_result["feature_importance"],
+        "charts": pipeline_result["charts"]
     }
 
     MODEL_CACHE[cache_key] = result
