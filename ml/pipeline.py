@@ -1,5 +1,5 @@
 """
-ML Pipeline for FairHire — Next-Gen Production SHAP AI Engine
+ML Pipeline for FairHire — Production SHAP AI Engine V3
 """
 import pandas as pd
 import numpy as np
@@ -13,8 +13,6 @@ from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 import logging
 import shap
-import joblib
-from config import MODEL_FOLDER
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +29,7 @@ class MLPipeline:
         targets = []
         for col in df.columns:
             n_unq = df[col].nunique()
-            if 1 < n_unq < 10:
+            if 1 < n_unq < 10 and not self._is_sensitive(col):
                 targets.append(col)
         if targets:
             return targets[-1], 0.70
@@ -41,6 +39,11 @@ class MLPipeline:
             return cats[-1], 0.40
             
         return df.columns[-1], 0.10
+
+    def _is_sensitive(self, col_name: str) -> bool:
+        col_str = str(col_name).lower()
+        sensitive_keywords = ["gender", "sex", "race", "ethnicity", "age", "dob", "years"]
+        return any(kw in col_str for kw in sensitive_keywords)
 
     def _detect_sensitive_group(self, df: pd.DataFrame, keywords: list) -> str:
         for col in df.columns:
@@ -68,18 +71,25 @@ class MLPipeline:
             if len(rates) > 1:
                 max_r = max(rates)
                 min_r = min(rates)
+                
+                max_group = max(groups.keys(), key=lambda k: groups[k]['rate'])
+                min_group = min(groups.keys(), key=lambda k: groups[k]['rate'])
+                
                 disparity = float(max_r - min_r)
                 ratio = float(min_r / max_r) if max_r > 0 else 0.0
+                score = disparity * (1.0 - ratio)
                 
-                if disparity < 0.1: lvl = "Low Bias"
-                elif disparity < 0.3: lvl = "Moderate Bias"
+                if score < 0.1: lvl = "Low Bias"
+                elif score < 0.3: lvl = "Moderate Bias"
                 else: lvl = "High Bias"
                 
                 fairness_report[key] = {
                     "groups": groups,
                     "disparity": disparity,
                     "ratio": ratio,
-                    "bias_level": lvl
+                    "score": score,
+                    "bias_level": lvl,
+                    "insight": f"Model shows higher selection rate for '{max_group}' compared to '{min_group}' indicating potential bias." if disparity > 0.1 else "Demographic selection variance remains within equitable parameters."
                 }
         return fairness_report
 
@@ -88,8 +98,8 @@ class MLPipeline:
             preprocessor = clf.named_steps['preprocessor']
             classifier = clf.named_steps['classifier']
             
-            # Using only 200 samples natively limits computation load dramatically so SHAP responds fast
-            X_trans = preprocessor.transform(X_train_raw[:200])
+            sample_size = min(len(X_train_raw), 1000)
+            X_trans = preprocessor.transform(X_train_raw[:sample_size])
             if hasattr(X_trans, "toarray"):
                 X_trans = X_trans.toarray()
                 
@@ -114,7 +124,7 @@ class MLPipeline:
                     "feature_impact": {f[0]: float(round(f[1],4)) for f in sorted_feats[:10]}
                 }
         except Exception as e:
-            logger.warning(f"SHAP extraction failed natively: {e}")
+            logger.warning(f"SHAP extraction failed: {e}")
             
         return {"top_features": [], "feature_impact": {}}
 
@@ -123,25 +133,30 @@ class MLPipeline:
             df = df_input.copy()
 
             if df.empty:
-                raise ValueError("Dataset is completely empty.")
+                return {"error": "Dataset is completely empty.", "failed": True}
             if len(df) < 50:
-                raise ValueError("Dataset too small (min 50 rows required).")
+                return {"error": "Dataset too small (min 50 rows required).", "failed": True}
             if len(df) > 50000:
-                raise ValueError("Dataset exceeds size limit (max 50,000 rows).")
+                df = df.sample(50000, random_state=self.random_state)
+                logger.warning("Dataset truncated to 50,000 rows.")
 
             missing_ratio = df.isnull().mean().mean()
             if missing_ratio > 0.5:
-                raise ValueError("Dataset rejected: > 50% missing values globally.")
+                return {"error": "Dataset rejected: > 50% missing values globally.", "failed": True}
 
             df = df.drop_duplicates()
 
             target_col, conf = self.detect_target(df)
             if not target_col:
-                raise ValueError("No target column detected.")
+                return {"error": "No target column detected.", "failed": True}
 
             df = df.dropna(subset=[target_col])
-            if df[target_col].nunique() < 2:
-                raise ValueError(f"Target '{target_col}' lacks multiple classes (requires >= 2).")
+            
+            class_counts = df[target_col].value_counts(normalize=True)
+            if len(class_counts) < 2:
+                return {"error": f"Target '{target_col}' lacks multiple classes (requires >= 2).", "failed": True}
+            if class_counts.iloc[0] > 0.95:
+                logger.warning(f"Extreme class imbalance detected (>95%) on target '{target_col}'.")
 
             le = LabelEncoder()
             y = le.fit_transform(df[target_col].astype(str))
@@ -164,7 +179,7 @@ class MLPipeline:
             
             X = X[final_cols]
             if X.empty:
-                raise ValueError("No usable features remain after purging constants/nulls.")
+                return {"error": "No usable features remain after purging constants/nulls.", "failed": True}
 
             numeric_features = []
             categorical_features = []
@@ -176,6 +191,14 @@ class MLPipeline:
                     X[col] = X[col].astype(str).str.strip().str.lower()
                     X[col] = X[col].replace({'nan': np.nan, 'none': np.nan, 'null': np.nan, '': np.nan})
                     categorical_features.append(col)
+
+            # High Correlation drop (Optional simple logic based on numeric)
+            if len(numeric_features) > 1:
+                corr_matrix = X[numeric_features].corr().abs()
+                upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
+                to_drop = [column for column in upper.columns if any(upper[column] > 0.9)]
+                X = X.drop(columns=to_drop, errors='ignore')
+                numeric_features = [c for c in numeric_features if c not in to_drop]
 
             transformers = []
             if numeric_features:
@@ -208,8 +231,6 @@ class MLPipeline:
                 model = RandomForestClassifier(class_weight="balanced", random_state=self.random_state)
                 clf = Pipeline(steps=[('preprocessor', preprocessor), ('classifier', model)])
                 clf.fit(X_train, y_train)
-
-            logger.info("Model trained successfully.")
 
             y_pred = clf.predict(X_test)
             if hasattr(clf.named_steps['classifier'], "predict_proba"):
@@ -248,7 +269,18 @@ class MLPipeline:
 
             class_dist = {str(k): int(v) for k, v in pd.Series(y).value_counts().items()}
             
-            bar_chart = [{"name": k, "value": v} for k, v in shap_data.get("feature_impact", {}).items()]
+            # Global insight extraction
+            global_insight = "Analysis completed smoothly. No prominent mathematical biases identified."
+            highest_score = -1.0
+            highest_level = "Low Bias"
+            for attr, rep in fairness.items():
+                if rep["score"] > highest_score:
+                    highest_score = rep["score"]
+                    highest_level = rep["bias_level"]
+                    if rep["disparity"] > 0.1:
+                        global_insight = rep["insight"]
+
+            bar_chart = [{"name": k[:15], "value": v} for k, v in shap_data.get("feature_impact", {}).items()]
             pie_chart = [{"name": f"Class {k}", "value": v} for k, v in class_dist.items()]
             
             fairness_chart = []
@@ -258,34 +290,25 @@ class MLPipeline:
                 first_key = list(fairness.keys())[0]
                 fairness_chart = [{"group": k, "rate": v['rate']} for k, v in fairness[first_key]["groups"].items()]
 
-            overall_bias_levels = [v.get("bias_level", "Low Bias") for v in fairness.values()] + ["Low Bias"]
-            highest_severity = max(overall_bias_levels, key=lambda x: {"Low Bias": 0, "Moderate Bias": 1, "High Bias": 2}[x])
-            
-            # Simple score deduction based on severity mapping
-            overall_severity_deduction = {"Low Bias": 0, "Moderate Bias": 20, "High Bias": 50}[highest_severity]
-
             return {
                 "metrics": metrics,
                 "target_column": target_col,
                 "target_confidence": conf,
-                "feature_summary": {
-                    "num_features": len(numeric_features),
-                    "cat_features": len(categorical_features)
-                },
+                "class_distribution": class_dist,
                 "fairness": fairness,
-                "feature_importance": shap_data,
                 "bias_summary": {
-                    "overall_severity": highest_severity,
-                    "fairness_score": float(100 - overall_severity_deduction)
+                    "overall_severity": highest_level,
+                    "fairness_score": float(100 - min(highest_score * 100, 99))
                 },
+                "feature_importance": shap_data,
+                "insight": global_insight,
                 "charts": {
                     "bar_chart": bar_chart,
                     "pie_chart": pie_chart,
                     "fairness_chart": fairness_chart
                 },
-                "predictions_sample": y_pred[:10].tolist(),
-                "class_distribution": class_dist,
-                "raw_test_df": X_test.copy()
+                "predictions_sample": y_pred[:10].tolist()
             }
+            
         except Exception as e:
             return {"error": str(e), "failed": True}

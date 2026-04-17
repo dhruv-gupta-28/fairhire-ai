@@ -32,90 +32,60 @@ def analyze_bias(file_path, user_id=None, save_to_db=False):
         df = pd.read_csv(file_path)
     except Exception as e:
         logger.error(f"Failed to read CSV file: {e}")
-        raise ValueError(f"Could not load CSV data: {str(e)}")
+        return {"error": f"Could not load CSV data: {str(e)}", "failed": True}
 
     if df.empty:
-        raise ValueError("The uploaded CSV file is completely empty.")
+        return {"error": "The uploaded CSV file is completely empty.", "failed": True}
 
     pipeline = MLPipeline(random_state=42)
     pipeline_result = pipeline.train(df)
     
     if pipeline_result.get("failed"):
-        raise ValueError(f"Pipeline Analysis Failed Natively: {pipeline_result.get('error')}")
-
-    # Re-map organic fairness data to React Dashboard legacy schema implicitly!
-    gender_bias = {}
-    if "gender" in pipeline_result["fairness"]:
-        gender_bias = {k: v["rate"] for k, v in pipeline_result["fairness"]["gender"]["groups"].items()}
-
-    race_bias = {}
-    if "race" in pipeline_result["fairness"]:
-        race_bias = {k: v["rate"] for k, v in pipeline_result["fairness"]["race"]["groups"].items()}
-
-    age_bias = {}
-    if "age" in pipeline_result["fairness"]:
-        age_bias = {k: v["rate"] for k, v in pipeline_result["fairness"]["age"]["groups"].items()}
-            
-    overall_score = pipeline_result["bias_summary"]["fairness_score"]
-
-    bias_payload = {
-        "fairness_score": overall_score,
-        "gender_bias": gender_bias,
-        "age_bias": age_bias,
-        "race_bias": race_bias,
-        "education_bias": {}
-    }
-
-    explanation_result = generate_bias_explanation(bias_payload)
-    recommendations_result = generate_suggestions(bias_payload)
-    summary_result = generate_detailed_summary(bias_payload)
+        return pipeline_result
 
     dataset_info = {
         "rows": int(len(df)),
         "features": int(len(df.columns)),
         "columns": df.columns.tolist()
     }
+    
+    pipeline_result["dataset_info"] = dataset_info
 
-    # Merging the new SHAP architecture directly into the response payload mapping
-    result = {
-        "model_metrics": pipeline_result["metrics"],
+    # To maintain stability for Gemini Recommendations & Fallbacks, we can bridge it using the old format logic 
+    # but append it directly into the result payload
+    gender_bias = {}
+    if "gender" in pipeline_result.get("fairness", {}):
+        gender_bias = {k: v["rate"] for k, v in pipeline_result["fairness"]["gender"]["groups"].items()}
+        
+    overall_score = pipeline_result.get("bias_summary", {}).get("fairness_score", 100.0)
+
+    bias_payload = {
         "fairness_score": overall_score,
-        "summary": summary_result["summary"],
         "gender_bias": gender_bias,
-        "age_bias": age_bias,
-        "race_bias": race_bias,
-        "education_bias": {},
-        "occupation_bias": {},
-        "explanation": explanation_result["explanations"],
-        "recommendations": recommendations_result["recommendations"],
-        "ai_used": summary_result["ai_used"] or recommendations_result["ai_used"] or explanation_result["ai_used"],
-        "dataset_info": dataset_info,
-        "advanced_fairness": {
-            "overall_score": overall_score,
-            "severity": pipeline_result["bias_summary"]["overall_severity"],
-            "metric_gaps": {},
-            "weights": {},
-            "thresholds": {},
-            "protected_attributes_evaluated": list(pipeline_result["fairness"].keys())
-        },
-        "flagged_metrics": pipeline_result["fairness"],
-        "target_column": pipeline_result["target_column"],
-        "target_confidence": pipeline_result["target_confidence"],
-        "feature_summary": pipeline_result["feature_summary"],
-        "predictions_sample": pipeline_result["predictions_sample"],
-        "class_distribution": pipeline_result["class_distribution"],
-        "feature_importance": pipeline_result["feature_importance"],
-        "charts": pipeline_result["charts"]
+        "age_bias": {},
+        "race_bias": {},
+        "education_bias": {}
     }
 
-    MODEL_CACHE[cache_key] = result
+    # Retrieve fallback / AI recommendations dynamically
+    recommendations_result = generate_suggestions(bias_payload)
+
+    # Attach Recommendations natively
+    pipeline_result["recommendations"] = recommendations_result["recommendations"]
+    pipeline_result["ai_used"] = recommendations_result["ai_used"]
+    pipeline_result["fairness_score"] = overall_score
+    
+    # Backwards compatibility
+    pipeline_result["gender_bias"] = gender_bias
+
+    MODEL_CACHE[cache_key] = pipeline_result
     if len(MODEL_CACHE) > MODEL_CACHE_MAX_SIZE:
         MODEL_CACHE.popitem(last=False)
 
     if save_to_db and user_id:
         try:
-            Analysis.create(user_id, dataset_info, overall_score, result)
+            Analysis.create(user_id, dataset_info, overall_score, pipeline_result)
         except Exception as e:
             logger.warning(f"Failed to save analysis record: {e}")
 
-    return result
+    return pipeline_result
