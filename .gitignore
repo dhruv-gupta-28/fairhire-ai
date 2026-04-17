@@ -1,0 +1,12 @@
+venv/
+__pycache__/
+*.pyc
+.env
+.idea/
+.vscode/
+frontend-react/node_modules/
+node_modules/
+dist/
+build/
+*.pdf
+*.docx

@@ -1,0 +1,501 @@
+2026-04-04 16:30:29,844 - __main__ - INFO - Starting FairHire API on 0.0.0.0:5000
+2026-04-04 16:30:29,874 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.29.167:5000
+2026-04-04 16:30:29,874 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2026-04-04 16:34:09,783 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 16:34:09] "[31m[1mGET /auth/register HTTP/1.1[0m" 405 -
+2026-04-04 16:44:41,187 - database - INFO - Connected to MongoDB
+2026-04-04 16:44:41,490 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 16:44:41] "[35m[1mPOST /auth/register HTTP/1.1[0m" 201 -
+2026-04-04 16:52:48,795 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 16:52:48] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-04 16:54:40,269 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 16:54:40] "[33mGET /logo192.png HTTP/1.1[0m" 404 -
+2026-04-04 16:54:40,271 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 16:54:40] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-04-04 17:10:34,025 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:10:34] "[33mGET /main.56e6886cdc4cc14ee851.hot-update.json HTTP/1.1[0m" 404 -
+2026-04-04 17:11:14,277 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:11:14] "OPTIONS /auth/register HTTP/1.1" 200 -
+2026-04-04 17:11:14,618 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:11:14] "[35m[1mPOST /auth/register HTTP/1.1[0m" 201 -
+2026-04-04 17:11:14,700 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:11:14] "OPTIONS /history/analyses HTTP/1.1" 200 -
+2026-04-04 17:11:14,702 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:11:14] "OPTIONS /history/reports HTTP/1.1" 200 -
+2026-04-04 17:11:14,704 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:11:14] "OPTIONS /history/analyses HTTP/1.1" 200 -
+2026-04-04 17:11:14,706 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:11:14] "OPTIONS /history/reports HTTP/1.1" 200 -
+2026-04-04 17:11:14,711 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:11:14] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-04 17:11:14,715 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:11:14] "GET /history/reports HTTP/1.1" 200 -
+2026-04-04 17:11:14,718 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:11:14] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-04 17:11:14,721 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:11:14] "GET /history/reports HTTP/1.1" 200 -
+2026-04-04 17:20:50,294 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:20:50] "OPTIONS /history/analyses HTTP/1.1" 200 -
+2026-04-04 17:20:50,296 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:20:50] "OPTIONS /history/reports HTTP/1.1" 200 -
+2026-04-04 17:20:50,299 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:20:50] "OPTIONS /history/analyses HTTP/1.1" 200 -
+2026-04-04 17:20:50,303 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:20:50] "OPTIONS /history/reports HTTP/1.1" 200 -
+2026-04-04 17:20:50,311 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:20:50] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-04 17:20:50,314 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:20:50] "GET /history/reports HTTP/1.1" 200 -
+2026-04-04 17:20:50,321 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:20:50] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-04 17:20:50,324 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:20:50] "GET /history/reports HTTP/1.1" 200 -
+2026-04-04 17:22:06,139 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:22:06] "OPTIONS /history/analyses HTTP/1.1" 200 -
+2026-04-04 17:22:06,141 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:22:06] "OPTIONS /history/reports HTTP/1.1" 200 -
+2026-04-04 17:22:06,145 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:22:06] "OPTIONS /history/analyses HTTP/1.1" 200 -
+2026-04-04 17:22:06,148 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:22:06] "OPTIONS /history/reports HTTP/1.1" 200 -
+2026-04-04 17:22:06,157 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:22:06] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-04 17:22:06,157 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:22:06] "GET /history/reports HTTP/1.1" 200 -
+2026-04-04 17:22:06,160 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:22:06] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-04 17:22:06,166 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:22:06] "GET /history/reports HTTP/1.1" 200 -
+2026-04-04 17:22:22,625 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:22:22] "OPTIONS /auth/login HTTP/1.1" 200 -
+2026-04-04 17:22:22,972 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:22:22] "POST /auth/login HTTP/1.1" 200 -
+2026-04-04 17:22:23,056 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:22:23] "OPTIONS /history/analyses HTTP/1.1" 200 -
+2026-04-04 17:22:23,058 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:22:23] "OPTIONS /history/reports HTTP/1.1" 200 -
+2026-04-04 17:22:23,060 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:22:23] "OPTIONS /history/analyses HTTP/1.1" 200 -
+2026-04-04 17:22:23,062 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:22:23] "OPTIONS /history/reports HTTP/1.1" 200 -
+2026-04-04 17:22:23,066 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:22:23] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-04 17:22:23,069 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:22:23] "GET /history/reports HTTP/1.1" 200 -
+2026-04-04 17:22:23,073 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:22:23] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-04 17:22:23,076 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:22:23] "GET /history/reports HTTP/1.1" 200 -
+2026-04-04 17:43:26,543 - __main__ - INFO - Starting FairHire API on 0.0.0.0:5000
+2026-04-04 17:43:26,569 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.29.167:5000
+2026-04-04 17:43:26,569 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2026-04-04 17:45:31,968 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:45:31] "[31m[1mGET /history/analyses HTTP/1.1[0m" 401 -
+2026-04-04 17:45:31,970 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:45:31] "[31m[1mGET /history/reports HTTP/1.1[0m" 401 -
+2026-04-04 17:45:31,973 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:45:31] "[31m[1mGET /history/analyses HTTP/1.1[0m" 401 -
+2026-04-04 17:45:31,977 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:45:31] "[31m[1mGET /history/reports HTTP/1.1[0m" 401 -
+2026-04-04 17:46:22,666 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:46:22] "[31m[1mPOST /analyze HTTP/1.1[0m" 401 -
+2026-04-04 17:46:26,913 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:46:26] "[31m[1mPOST /analyze HTTP/1.1[0m" 401 -
+2026-04-04 17:52:54,710 - database - INFO - Connected to MongoDB
+2026-04-04 17:52:55,002 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:52:55] "POST /auth/login HTTP/1.1" 200 -
+2026-04-04 17:52:55,048 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:52:55] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-04 17:52:55,050 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:52:55] "GET /history/reports HTTP/1.1" 200 -
+2026-04-04 17:52:55,052 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:52:55] "GET /history/reports HTTP/1.1" 200 -
+2026-04-04 17:52:55,054 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:52:55] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-04 17:53:05,353 - __main__ - INFO - Analyzing file: data.csv
+2026-04-04 17:53:06,164 - bias_detector - INFO - Analysis completed, score: 49.7
+2026-04-04 17:53:06,170 - __main__ - INFO - Analysis completed successfully
+2026-04-04 17:53:06,173 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:53:06] "POST /analyze HTTP/1.1" 200 -
+2026-04-04 17:53:09,976 - report_generator - INFO - PDF report generated: C:\fairhire-ai\reports\fairhire_report.pdf
+2026-04-04 17:53:09,986 - __main__ - INFO - Report generated: C:\fairhire-ai\reports\fairhire_report.pdf
+2026-04-04 17:53:10,109 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:53:10] "POST /report HTTP/1.1" 200 -
+2026-04-04 17:55:35,463 - __main__ - INFO - Starting FairHire API on 0.0.0.0:5000
+2026-04-04 17:55:35,478 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.29.167:5000
+2026-04-04 17:55:35,479 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2026-04-04 17:55:46,744 - database - INFO - Connected to MongoDB
+2026-04-04 17:55:47,036 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:55:47] "POST /auth/login HTTP/1.1" 200 -
+2026-04-04 17:55:47,080 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:55:47] "GET /history/reports HTTP/1.1" 200 -
+2026-04-04 17:55:47,081 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:55:47] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-04 17:55:47,082 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:55:47] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-04 17:55:47,086 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:55:47] "GET /history/reports HTTP/1.1" 200 -
+2026-04-04 17:55:57,032 - __main__ - INFO - Analyzing file: data.csv
+2026-04-04 17:55:57,777 - bias_detector - INFO - Analysis completed, score: 49.7
+2026-04-04 17:55:57,783 - __main__ - INFO - Analysis completed successfully
+2026-04-04 17:55:57,788 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:55:57] "POST /analyze HTTP/1.1" 200 -
+2026-04-04 17:56:02,371 - report_generator - INFO - PDF report generated: C:\fairhire-ai\reports\fairhire_report.pdf
+2026-04-04 17:56:02,373 - __main__ - INFO - Report generated: C:\fairhire-ai\reports\fairhire_report.pdf
+2026-04-04 17:56:02,493 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 17:56:02] "POST /report HTTP/1.1" 200 -
+2026-04-04 19:04:16,667 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-04 19:04:16,829 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.29.167:5000
+2026-04-04 19:04:16,829 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2026-04-04 19:04:16,839 - werkzeug - INFO -  * Restarting with stat
+2026-04-04 19:04:19,682 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-04 19:04:19,690 - werkzeug - WARNING -  * Debugger is active!
+2026-04-04 19:04:19,704 - werkzeug - INFO -  * Debugger PIN: 236-333-636
+2026-04-04 19:06:46,837 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-04 19:06:46,862 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.29.167:5000
+2026-04-04 19:06:46,862 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2026-04-04 19:06:46,864 - werkzeug - INFO -  * Restarting with stat
+2026-04-04 19:06:50,037 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-04 19:06:50,057 - werkzeug - WARNING -  * Debugger is active!
+2026-04-04 19:06:50,075 - werkzeug - INFO -  * Debugger PIN: 236-333-636
+2026-04-04 19:08:03,938 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:08:03] "GET /health HTTP/1.1" 200 -
+2026-04-04 19:08:04,076 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:08:04] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-04-04 19:20:27,843 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:20:27] "[31m[1mGET /history/analyses HTTP/1.1[0m" 422 -
+2026-04-04 19:20:27,845 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:20:27] "[31m[1mGET /history/reports HTTP/1.1[0m" 422 -
+2026-04-04 19:20:27,847 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:20:27] "[31m[1mGET /history/analyses HTTP/1.1[0m" 422 -
+2026-04-04 19:20:27,850 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:20:27] "[31m[1mGET /history/reports HTTP/1.1[0m" 422 -
+2026-04-04 19:23:28,318 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:23:28] "[31m[1mGET /history/analyses HTTP/1.1[0m" 422 -
+2026-04-04 19:23:28,320 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:23:28] "[31m[1mGET /history/reports HTTP/1.1[0m" 422 -
+2026-04-04 19:23:28,324 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:23:28] "[31m[1mGET /history/analyses HTTP/1.1[0m" 422 -
+2026-04-04 19:23:28,326 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:23:28] "[31m[1mGET /history/reports HTTP/1.1[0m" 422 -
+2026-04-04 19:23:30,095 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:23:30] "[31m[1mGET /history/analyses HTTP/1.1[0m" 422 -
+2026-04-04 19:23:30,096 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:23:30] "[31m[1mGET /history/reports HTTP/1.1[0m" 422 -
+2026-04-04 19:23:30,099 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:23:30] "[31m[1mGET /history/analyses HTTP/1.1[0m" 422 -
+2026-04-04 19:23:30,101 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:23:30] "[31m[1mGET /history/reports HTTP/1.1[0m" 422 -
+2026-04-04 19:24:24,747 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:24:24] "[31m[1mGET /history/analyses HTTP/1.1[0m" 422 -
+2026-04-04 19:24:24,749 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:24:24] "[31m[1mGET /history/reports HTTP/1.1[0m" 422 -
+2026-04-04 19:24:24,750 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:24:24] "[31m[1mGET /history/analyses HTTP/1.1[0m" 422 -
+2026-04-04 19:24:24,752 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:24:24] "[31m[1mGET /history/reports HTTP/1.1[0m" 422 -
+2026-04-04 19:24:29,938 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:24:29] "[31m[1mGET /history/analyses HTTP/1.1[0m" 422 -
+2026-04-04 19:24:29,940 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:24:29] "[31m[1mGET /history/reports HTTP/1.1[0m" 422 -
+2026-04-04 19:24:29,942 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:24:29] "[31m[1mGET /history/analyses HTTP/1.1[0m" 422 -
+2026-04-04 19:24:29,945 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:24:29] "[31m[1mGET /history/reports HTTP/1.1[0m" 422 -
+2026-04-04 19:24:34,131 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:24:34] "[31m[1mGET /history/analyses HTTP/1.1[0m" 422 -
+2026-04-04 19:24:34,132 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:24:34] "[31m[1mGET /history/reports HTTP/1.1[0m" 422 -
+2026-04-04 19:24:34,134 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:24:34] "[31m[1mGET /history/analyses HTTP/1.1[0m" 422 -
+2026-04-04 19:24:34,139 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:24:34] "[31m[1mGET /history/reports HTTP/1.1[0m" 422 -
+2026-04-04 19:25:07,933 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:25:07] "[31m[1mGET /history/analyses HTTP/1.1[0m" 422 -
+2026-04-04 19:25:07,934 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:25:07] "[31m[1mGET /history/reports HTTP/1.1[0m" 422 -
+2026-04-04 19:25:07,937 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:25:07] "[31m[1mGET /history/analyses HTTP/1.1[0m" 422 -
+2026-04-04 19:25:07,940 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:25:07] "[31m[1mGET /history/reports HTTP/1.1[0m" 422 -
+2026-04-04 19:25:24,714 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:25:24] "[31m[1mGET /history/analyses HTTP/1.1[0m" 422 -
+2026-04-04 19:25:24,716 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:25:24] "[31m[1mGET /history/reports HTTP/1.1[0m" 422 -
+2026-04-04 19:25:24,718 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:25:24] "[31m[1mGET /history/analyses HTTP/1.1[0m" 422 -
+2026-04-04 19:25:24,722 - werkzeug - INFO - 127.0.0.1 - - [04/Apr/2026 19:25:24] "[31m[1mGET /history/reports HTTP/1.1[0m" 422 -
+2026-04-07 11:13:58,154 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-07 11:13:58,226 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.232.246.65:5000
+2026-04-07 11:13:58,226 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2026-04-07 11:13:58,228 - werkzeug - INFO -  * Restarting with stat
+2026-04-07 11:14:01,306 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-07 11:14:01,320 - werkzeug - WARNING -  * Debugger is active!
+2026-04-07 11:14:01,326 - werkzeug - INFO -  * Debugger PIN: 236-333-636
+2026-04-07 11:14:02,928 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\resume_analyzer.py', reloading
+2026-04-07 11:14:03,372 - werkzeug - INFO -  * Restarting with stat
+2026-04-07 11:14:06,518 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-07 11:14:06,534 - werkzeug - WARNING -  * Debugger is active!
+2026-04-07 11:14:06,539 - werkzeug - INFO -  * Debugger PIN: 236-333-636
+2026-04-07 11:14:24,959 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\app.py', reloading
+2026-04-07 11:14:25,397 - werkzeug - INFO -  * Restarting with stat
+2026-04-07 11:14:28,613 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-07 11:14:28,626 - werkzeug - WARNING -  * Debugger is active!
+2026-04-07 11:14:28,631 - werkzeug - INFO -  * Debugger PIN: 236-333-636
+2026-04-07 11:14:33,686 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\config.py', reloading
+2026-04-07 11:14:34,125 - werkzeug - INFO -  * Restarting with stat
+2026-04-07 11:36:56,168 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-07 11:36:56,193 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.232.246.65:5000
+2026-04-07 11:36:56,193 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2026-04-07 11:36:56,195 - werkzeug - INFO -  * Restarting with stat
+2026-04-07 11:36:59,329 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-07 11:36:59,342 - werkzeug - WARNING -  * Debugger is active!
+2026-04-07 11:36:59,347 - werkzeug - INFO -  * Debugger PIN: 236-333-636
+2026-04-07 11:37:33,850 - database - INFO - Connected to MongoDB
+2026-04-07 11:37:33,873 - werkzeug - INFO - 127.0.0.1 - - [07/Apr/2026 11:37:33] "[31m[1mPOST /auth/login HTTP/1.1[0m" 401 -
+2026-04-07 11:37:40,851 - werkzeug - INFO - 127.0.0.1 - - [07/Apr/2026 11:37:40] "[35m[1mPOST /auth/register HTTP/1.1[0m" 201 -
+2026-04-07 11:37:56,311 - werkzeug - INFO - 127.0.0.1 - - [07/Apr/2026 11:37:56] "POST /auth/login HTTP/1.1" 200 -
+2026-04-07 11:38:04,790 - werkzeug - INFO - 127.0.0.1 - - [07/Apr/2026 11:38:04] "[31m[1mPOST /analyze HTTP/1.1[0m" 422 -
+2026-04-07 11:44:38,879 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\ml\\pipeline.py', reloading
+2026-04-07 11:44:39,681 - werkzeug - INFO -  * Restarting with stat
+2026-04-07 11:44:42,745 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-07 11:44:42,769 - werkzeug - WARNING -  * Debugger is active!
+2026-04-07 11:44:42,782 - werkzeug - INFO -  * Debugger PIN: 236-333-636
+2026-04-07 11:44:44,762 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\ml\\pipeline.py', reloading
+2026-04-07 11:44:45,225 - werkzeug - INFO -  * Restarting with stat
+2026-04-07 11:44:48,210 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-07 11:44:48,222 - werkzeug - WARNING -  * Debugger is active!
+2026-04-07 11:44:48,227 - werkzeug - INFO -  * Debugger PIN: 236-333-636
+2026-04-07 11:45:00,317 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\gemini_helper.py', reloading
+2026-04-07 11:45:00,972 - werkzeug - INFO -  * Restarting with stat
+2026-04-07 11:45:04,096 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-07 11:45:04,115 - werkzeug - WARNING -  * Debugger is active!
+2026-04-07 11:45:04,126 - werkzeug - INFO -  * Debugger PIN: 236-333-636
+2026-04-07 11:45:11,980 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\gemini_helper.py', reloading
+2026-04-07 11:45:12,375 - werkzeug - INFO -  * Restarting with stat
+2026-04-07 11:45:15,461 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-07 11:45:15,474 - werkzeug - WARNING -  * Debugger is active!
+2026-04-07 11:45:15,479 - werkzeug - INFO -  * Debugger PIN: 236-333-636
+2026-04-07 11:45:20,557 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\gemini_helper.py', reloading
+2026-04-07 11:45:20,965 - werkzeug - INFO -  * Restarting with stat
+2026-04-07 11:45:24,097 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-07 11:45:24,112 - werkzeug - WARNING -  * Debugger is active!
+2026-04-07 11:45:24,117 - werkzeug - INFO -  * Debugger PIN: 236-333-636
+2026-04-07 11:45:31,637 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\bias_detector.py', reloading
+2026-04-07 11:45:32,088 - werkzeug - INFO -  * Restarting with stat
+2026-04-07 11:45:35,432 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-07 11:45:35,445 - werkzeug - WARNING -  * Debugger is active!
+2026-04-07 11:45:35,450 - werkzeug - INFO -  * Debugger PIN: 236-333-636
+2026-04-07 11:45:43,723 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\resume_analyzer.py', reloading
+2026-04-07 11:45:44,303 - werkzeug - INFO -  * Restarting with stat
+2026-04-07 11:45:47,951 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-07 11:45:47,970 - werkzeug - WARNING -  * Debugger is active!
+2026-04-07 11:45:47,978 - werkzeug - INFO -  * Debugger PIN: 236-333-636
+2026-04-07 11:46:07,140 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\job_matcher.py', reloading
+2026-04-07 11:46:07,669 - werkzeug - INFO -  * Restarting with stat
+2026-04-07 11:46:11,329 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-07 11:46:11,352 - werkzeug - WARNING -  * Debugger is active!
+2026-04-07 11:46:11,360 - werkzeug - INFO -  * Debugger PIN: 236-333-636
+2026-04-07 11:46:34,775 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\app.py', reloading
+2026-04-07 11:46:35,314 - werkzeug - INFO -  * Restarting with stat
+2026-04-07 11:46:39,283 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-07 11:46:39,311 - werkzeug - WARNING -  * Debugger is active!
+2026-04-07 11:46:39,319 - werkzeug - INFO -  * Debugger PIN: 236-333-636
+2026-04-07 11:46:43,988 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\config.py', reloading
+2026-04-07 11:46:44,546 - werkzeug - INFO -  * Restarting with stat
+2026-04-07 11:46:48,444 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-07 11:46:48,468 - werkzeug - WARNING -  * Debugger is active!
+2026-04-07 11:46:48,476 - werkzeug - INFO -  * Debugger PIN: 236-333-636
+2026-04-07 11:46:51,845 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\app.py', reloading
+2026-04-07 11:46:52,419 - werkzeug - INFO -  * Restarting with stat
+2026-04-07 11:46:56,090 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-07 11:46:56,109 - werkzeug - WARNING -  * Debugger is active!
+2026-04-07 11:46:56,118 - werkzeug - INFO -  * Debugger PIN: 236-333-636
+2026-04-07 11:47:04,853 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\app.py', reloading
+2026-04-07 11:47:05,393 - werkzeug - INFO -  * Restarting with stat
+2026-04-07 11:47:08,561 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-07 11:47:08,580 - werkzeug - WARNING -  * Debugger is active!
+2026-04-07 11:47:08,588 - werkzeug - INFO -  * Debugger PIN: 236-333-636
+2026-04-07 11:47:34,579 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\app.py', reloading
+2026-04-07 11:47:35,106 - werkzeug - INFO -  * Restarting with stat
+2026-04-07 11:47:38,273 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-07 11:47:38,294 - werkzeug - WARNING -  * Debugger is active!
+2026-04-07 11:47:38,302 - werkzeug - INFO -  * Debugger PIN: 236-333-636
+2026-04-07 11:47:50,831 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\app.py', reloading
+2026-04-07 11:47:51,365 - werkzeug - INFO -  * Restarting with stat
+2026-04-07 11:47:54,542 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-07 11:47:54,563 - werkzeug - WARNING -  * Debugger is active!
+2026-04-07 11:47:54,570 - werkzeug - INFO -  * Debugger PIN: 236-333-636
+2026-04-07 11:48:26,322 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\app.py', reloading
+2026-04-07 11:48:26,921 - werkzeug - INFO -  * Restarting with stat
+2026-04-07 11:48:31,793 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-07 11:48:31,818 - werkzeug - WARNING -  * Debugger is active!
+2026-04-07 11:48:31,829 - werkzeug - INFO -  * Debugger PIN: 236-333-636
+2026-04-07 11:48:48,456 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\gemini_helper.py', reloading
+2026-04-07 11:48:48,910 - werkzeug - INFO -  * Restarting with stat
+2026-04-07 11:48:52,172 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-07 11:48:52,185 - werkzeug - WARNING -  * Debugger is active!
+2026-04-07 11:48:52,190 - werkzeug - INFO -  * Debugger PIN: 236-333-636
+2026-04-07 11:52:54,554 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-07 11:52:54,576 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.232.246.65:5000
+2026-04-07 11:52:54,577 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2026-04-07 11:52:54,578 - werkzeug - INFO -  * Restarting with stat
+2026-04-07 11:52:57,315 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-07 11:52:57,328 - werkzeug - WARNING -  * Debugger is active!
+2026-04-07 11:52:57,332 - werkzeug - INFO -  * Debugger PIN: 236-333-636
+2026-04-07 11:55:05,456 - database - INFO - Connected to MongoDB
+2026-04-07 11:55:05,748 - werkzeug - INFO - 127.0.0.1 - - [07/Apr/2026 11:55:05] "POST /auth/login HTTP/1.1" 200 -
+2026-04-07 11:55:24,099 - werkzeug - INFO - 127.0.0.1 - - [07/Apr/2026 11:55:24] "POST /auth/login HTTP/1.1" 200 -
+2026-04-07 11:55:48,886 - werkzeug - INFO - 127.0.0.1 - - [07/Apr/2026 11:55:48] "[31m[1mPOST /auth/register HTTP/1.1[0m" 409 -
+2026-04-07 11:57:55,207 - werkzeug - INFO - 127.0.0.1 - - [07/Apr/2026 11:57:55] "POST /auth/login HTTP/1.1" 200 -
+2026-04-07 12:17:24,588 - werkzeug - INFO - 127.0.0.1 - - [07/Apr/2026 12:17:24] "POST /auth/login HTTP/1.1" 200 -
+2026-04-07 12:56:03,997 - database - INFO - Connected to MongoDB
+2026-04-07 12:56:04,297 - werkzeug - INFO - 127.0.0.1 - - [07/Apr/2026 12:56:04] "POST /auth/login HTTP/1.1" 200 -
+2026-04-07 13:10:31,052 - werkzeug - INFO - 127.0.0.1 - - [07/Apr/2026 13:10:31] "POST /auth/login HTTP/1.1" 200 -
+2026-04-07 13:10:32,124 - werkzeug - INFO - 127.0.0.1 - - [07/Apr/2026 13:10:32] "GET /history/reports HTTP/1.1" 200 -
+2026-04-07 13:10:32,128 - werkzeug - INFO - 127.0.0.1 - - [07/Apr/2026 13:10:32] "GET /history/reports HTTP/1.1" 200 -
+2026-04-07 13:10:32,133 - werkzeug - INFO - 127.0.0.1 - - [07/Apr/2026 13:10:32] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-07 13:10:32,134 - werkzeug - INFO - 127.0.0.1 - - [07/Apr/2026 13:10:32] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-07 13:13:08,548 - werkzeug - INFO - 127.0.0.1 - - [07/Apr/2026 13:13:08] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-07 13:13:08,550 - werkzeug - INFO - 127.0.0.1 - - [07/Apr/2026 13:13:08] "GET /history/reports HTTP/1.1" 200 -
+2026-04-07 13:13:08,553 - werkzeug - INFO - 127.0.0.1 - - [07/Apr/2026 13:13:08] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-07 13:13:08,555 - werkzeug - INFO - 127.0.0.1 - - [07/Apr/2026 13:13:08] "GET /history/reports HTTP/1.1" 200 -
+2026-04-07 13:17:17,918 - werkzeug - INFO -  * Detected change in 'c:\\fairhire-ai\\database.py', reloading
+2026-04-07 13:17:19,144 - werkzeug - INFO -  * Restarting with stat
+2026-04-07 13:17:35,427 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-07 13:17:35,481 - werkzeug - WARNING -  * Debugger is active!
+2026-04-07 13:17:35,490 - werkzeug - INFO -  * Debugger PIN: 236-333-636
+2026-04-17 22:01:27,789 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-17 22:01:27,854 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.90.187.65:5000
+2026-04-17 22:01:27,854 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2026-04-17 22:01:27,857 - werkzeug - INFO -  * Restarting with stat
+2026-04-17 22:01:30,509 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-17 22:01:30,521 - werkzeug - WARNING -  * Debugger is active!
+2026-04-17 22:01:30,525 - werkzeug - INFO -  * Debugger PIN: 141-379-729
+2026-04-17 22:02:53,205 - database - INFO - Connected to MongoDB
+2026-04-17 22:02:53,557 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:02:53] "POST /auth/login HTTP/1.1" 200 -
+2026-04-17 22:02:54,658 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:02:54] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-17 22:02:54,673 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:02:54] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-17 22:02:54,680 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:02:54] "GET /history/reports HTTP/1.1" 200 -
+2026-04-17 22:02:54,692 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:02:54] "GET /history/reports HTTP/1.1" 200 -
+2026-04-17 22:03:39,962 - job_matcher - INFO - Fetched 5 jobs from Adzuna API
+2026-04-17 22:03:39,998 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:03:39] "POST /job/match HTTP/1.1" 200 -
+2026-04-17 22:05:56,679 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:05:56] "POST /resume/analyze HTTP/1.1" 200 -
+2026-04-17 22:06:30,167 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:06:30] "[31m[1mPOST /analyze HTTP/1.1[0m" 400 -
+2026-04-17 22:06:39,660 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:06:39] "[31m[1mPOST /analyze HTTP/1.1[0m" 400 -
+2026-04-17 22:07:20,213 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:07:20] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-17 22:07:20,215 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:07:20] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-17 22:07:20,218 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:07:20] "GET /history/reports HTTP/1.1" 200 -
+2026-04-17 22:07:20,219 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:07:20] "GET /history/reports HTTP/1.1" 200 -
+2026-04-17 22:09:03,008 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:09:03] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-17 22:09:03,019 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:09:03] "GET /history/reports HTTP/1.1" 200 -
+2026-04-17 22:09:03,020 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:09:03] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-17 22:09:03,022 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:09:03] "GET /history/reports HTTP/1.1" 200 -
+2026-04-17 22:09:44,245 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\app.py', reloading
+2026-04-17 22:09:45,139 - werkzeug - INFO -  * Restarting with stat
+2026-04-17 22:09:48,051 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-17 22:09:48,062 - werkzeug - WARNING -  * Debugger is active!
+2026-04-17 22:09:48,066 - werkzeug - INFO -  * Debugger PIN: 141-379-729
+2026-04-17 22:10:07,706 - database - INFO - Connected to MongoDB
+2026-04-17 22:10:07,708 - database - INFO - Connected to MongoDB
+2026-04-17 22:10:07,708 - database - INFO - Connected to MongoDB
+2026-04-17 22:10:07,709 - database - INFO - Connected to MongoDB
+2026-04-17 22:10:07,711 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:10:07] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-17 22:10:07,714 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:10:07] "GET /history/reports HTTP/1.1" 200 -
+2026-04-17 22:10:07,718 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:10:07] "GET /history/reports HTTP/1.1" 200 -
+2026-04-17 22:10:07,722 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:10:07] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-17 22:12:25,886 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:12:25] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-17 22:12:25,888 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:12:25] "GET /history/reports HTTP/1.1" 200 -
+2026-04-17 22:12:25,889 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:12:25] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-17 22:12:25,895 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:12:25] "GET /history/reports HTTP/1.1" 200 -
+2026-04-17 22:14:14,766 - ml.pipeline - INFO - Model trained successfully
+2026-04-17 22:14:14,773 - ml.pipeline - INFO - Model saved to disk
+2026-04-17 22:14:15,974 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-04-17 22:14:16,761 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 429 Too Many Requests"
+2026-04-17 22:14:16,763 - gemini_helper - ERROR - Gemini explanation error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash\nPlease retry in 44.048743011s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-2.0-flash', 'location': 'global'}}, {'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.0-flash'}}, {'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_input_token_count', 'quotaId': 'GenerateContentInputTokensPerModelPerMinute-FreeTier', 'quotaDimensions': {'model': 'gemini-2.0-flash', 'location': 'global'}}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '44s'}]}}
+2026-04-17 22:14:17,761 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-04-17 22:14:18,429 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 429 Too Many Requests"
+2026-04-17 22:14:18,435 - gemini_helper - ERROR - Gemini error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash\nPlease retry in 42.374692161s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.0-flash'}}, {'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.0-flash'}}, {'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_input_token_count', 'quotaId': 'GenerateContentInputTokensPerModelPerMinute-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.0-flash'}}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '42s'}]}}
+2026-04-17 22:14:19,453 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-04-17 22:14:20,027 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 429 Too Many Requests"
+2026-04-17 22:14:20,028 - gemini_helper - ERROR - Gemini summary error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash\nPlease retry in 40.790985637s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-2.0-flash', 'location': 'global'}}, {'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.0-flash'}}, {'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_input_token_count', 'quotaId': 'GenerateContentInputTokensPerModelPerMinute-FreeTier', 'quotaDimensions': {'model': 'gemini-2.0-flash', 'location': 'global'}}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '40s'}]}}
+2026-04-17 22:14:20,040 - bias_detector - INFO - Analysis completed, score: 49.7
+2026-04-17 22:14:20,041 - __main__ - INFO - Analysis completed for user 69d0f8dad8e2f4c96a0ace52, score: 49.7
+2026-04-17 22:14:20,044 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:14:20] "POST /analyze HTTP/1.1" 200 -
+2026-04-17 22:15:36,400 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:15:36] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-17 22:15:36,406 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:15:36] "GET /history/reports HTTP/1.1" 200 -
+2026-04-17 22:15:36,407 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:15:36] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-17 22:15:36,433 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:15:36] "GET /history/reports HTTP/1.1" 200 -
+2026-04-17 22:15:54,775 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:15:54] "POST /resume/analyze HTTP/1.1" 200 -
+2026-04-17 22:16:22,143 - job_matcher - INFO - Fetched 5 jobs from Adzuna API
+2026-04-17 22:16:22,175 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:16:22] "POST /job/match HTTP/1.1" 200 -
+2026-04-17 22:17:43,753 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:17:43] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-17 22:17:43,756 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:17:43] "GET /history/reports HTTP/1.1" 200 -
+2026-04-17 22:17:43,759 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:17:43] "GET /history/analyses HTTP/1.1" 200 -
+2026-04-17 22:17:43,762 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 22:17:43] "GET /history/reports HTTP/1.1" 200 -
+2026-04-17 22:18:30,034 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\database.py', reloading
+2026-04-17 22:18:30,761 - werkzeug - INFO -  * Restarting with stat
+2026-04-17 22:18:33,349 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-17 22:18:33,360 - werkzeug - WARNING -  * Debugger is active!
+2026-04-17 22:18:33,365 - werkzeug - INFO -  * Debugger PIN: 141-379-729
+2026-04-17 22:19:11,666 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\app.py', reloading
+2026-04-17 22:19:12,099 - werkzeug - INFO -  * Restarting with stat
+2026-04-17 22:19:14,683 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-17 22:19:14,694 - werkzeug - WARNING -  * Debugger is active!
+2026-04-17 22:19:14,698 - werkzeug - INFO -  * Debugger PIN: 141-379-729
+2026-04-17 22:25:38,027 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\app.py', reloading
+2026-04-17 22:25:38,563 - werkzeug - INFO -  * Restarting with stat
+2026-04-17 22:25:41,677 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-17 22:25:41,696 - werkzeug - WARNING -  * Debugger is active!
+2026-04-17 22:25:41,702 - werkzeug - INFO -  * Debugger PIN: 141-379-729
+2026-04-17 22:25:44,422 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\resume_analyzer.py', reloading
+2026-04-17 22:25:44,968 - werkzeug - INFO -  * Restarting with stat
+2026-04-17 22:25:47,929 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-17 22:25:47,941 - werkzeug - WARNING -  * Debugger is active!
+2026-04-17 22:25:47,945 - werkzeug - INFO -  * Debugger PIN: 141-379-729
+2026-04-17 22:29:33,508 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\firewall.py', reloading
+2026-04-17 22:29:34,063 - werkzeug - INFO -  * Restarting with stat
+2026-04-17 22:29:36,943 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-17 22:29:36,954 - werkzeug - WARNING -  * Debugger is active!
+2026-04-17 22:29:36,958 - werkzeug - INFO -  * Debugger PIN: 141-379-729
+2026-04-17 22:29:38,368 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\report_generator.py', reloading
+2026-04-17 22:29:38,923 - werkzeug - INFO -  * Restarting with stat
+2026-04-17 22:29:41,831 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-17 22:29:41,843 - werkzeug - WARNING -  * Debugger is active!
+2026-04-17 22:29:41,848 - werkzeug - INFO -  * Debugger PIN: 141-379-729
+2026-04-17 23:05:38,396 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-17 23:05:38,421 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.90.187.65:5000
+2026-04-17 23:05:38,421 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2026-04-17 23:05:38,422 - werkzeug - INFO -  * Restarting with stat
+2026-04-17 23:05:40,994 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-17 23:05:41,008 - werkzeug - WARNING -  * Debugger is active!
+2026-04-17 23:05:41,015 - werkzeug - INFO -  * Debugger PIN: 141-379-729
+2026-04-17 23:06:23,299 - database - INFO - Connected to MongoDB
+2026-04-17 23:06:23,438 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:06:23] "[31m[1mPOST /auth/login HTTP/1.1[0m" 401 -
+2026-04-17 23:06:59,305 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:06:59] "[35m[1mPOST /auth/register HTTP/1.1[0m" 500 -
+2026-04-17 23:07:22,231 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:07:22] "[31m[1mPOST /auth/register HTTP/1.1[0m" 400 -
+2026-04-17 23:07:42,922 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:07:42] "[35m[1mPOST /auth/login HTTP/1.1[0m" 500 -
+2026-04-17 23:09:18,204 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\app.py', reloading
+2026-04-17 23:09:19,236 - werkzeug - INFO -  * Restarting with stat
+2026-04-17 23:09:23,104 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-17 23:09:23,122 - werkzeug - WARNING -  * Debugger is active!
+2026-04-17 23:09:23,132 - werkzeug - INFO -  * Debugger PIN: 141-379-729
+2026-04-17 23:10:42,014 - database - INFO - Connected to MongoDB
+2026-04-17 23:10:42,474 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:10:42] "POST /auth/login HTTP/1.1" 200 -
+2026-04-17 23:10:43,514 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:10:43] "[33mGET /history/analyses HTTP/1.1[0m" 404 -
+2026-04-17 23:10:43,515 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:10:43] "[33mGET /history/analyses HTTP/1.1[0m" 404 -
+2026-04-17 23:10:43,516 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:10:43] "[33mGET /history/reports HTTP/1.1[0m" 404 -
+2026-04-17 23:10:43,518 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:10:43] "[33mGET /history/reports HTTP/1.1[0m" 404 -
+2026-04-17 23:10:59,487 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:10:59] "[33mGET /history/reports HTTP/1.1[0m" 404 -
+2026-04-17 23:10:59,488 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:10:59] "[33mGET /history/analyses HTTP/1.1[0m" 404 -
+2026-04-17 23:10:59,490 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:10:59] "[33mGET /history/analyses HTTP/1.1[0m" 404 -
+2026-04-17 23:10:59,493 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:10:59] "[33mGET /history/reports HTTP/1.1[0m" 404 -
+2026-04-17 23:11:02,767 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:11:02] "GET /profile HTTP/1.1" 200 -
+2026-04-17 23:11:03,625 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:11:03] "GET /profile HTTP/1.1" 200 -
+2026-04-17 23:11:59,743 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:11:59] "PUT /profile HTTP/1.1" 200 -
+2026-04-17 23:12:18,889 - ml.pipeline - INFO - Model loaded from disk
+2026-04-17 23:12:18,891 - ml.pipeline - INFO - Scaler and OHE columns loaded
+2026-04-17 23:12:19,295 - ml.pipeline - INFO - Model trained successfully
+2026-04-17 23:12:19,300 - ml.pipeline - INFO - Model saved to disk
+2026-04-17 23:12:20,461 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-04-17 23:12:21,144 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 429 Too Many Requests"
+2026-04-17 23:12:21,145 - gemini_helper - ERROR - Gemini explanation error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash\nPlease retry in 39.778546006s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_input_token_count', 'quotaId': 'GenerateContentInputTokensPerModelPerMinute-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.0-flash'}}, {'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.0-flash'}}, {'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.0-flash'}}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '39s'}]}}
+2026-04-17 23:12:22,115 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-04-17 23:12:22,783 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 429 Too Many Requests"
+2026-04-17 23:12:22,784 - gemini_helper - ERROR - Gemini error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash\nPlease retry in 38.175798431s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.0-flash'}}, {'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.0-flash'}}, {'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_input_token_count', 'quotaId': 'GenerateContentInputTokensPerModelPerMinute-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.0-flash'}}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '38s'}]}}
+2026-04-17 23:12:23,716 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-04-17 23:12:24,319 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 429 Too Many Requests"
+2026-04-17 23:12:24,320 - gemini_helper - ERROR - Gemini summary error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash\nPlease retry in 36.547907605s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_input_token_count', 'quotaId': 'GenerateContentInputTokensPerModelPerMinute-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.0-flash'}}, {'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.0-flash'}}, {'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.0-flash'}}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '36s'}]}}
+2026-04-17 23:12:24,440 - bias_detector - INFO - Analysis completed, score: 49.7
+2026-04-17 23:12:24,625 - __main__ - INFO - Analysis completed for user 69e26fbbe37e8de3de2b9025, score: 49.7
+2026-04-17 23:12:24,629 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:12:24] "POST /analyze HTTP/1.1" 200 -
+2026-04-17 23:13:41,940 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:13:41] "POST /resume/analyze HTTP/1.1" 200 -
+2026-04-17 23:15:44,979 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:15:44] "[33mGET /history/analyses HTTP/1.1[0m" 404 -
+2026-04-17 23:15:44,980 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:15:44] "[33mGET /history/analyses HTTP/1.1[0m" 404 -
+2026-04-17 23:15:44,982 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:15:44] "[33mGET /history/reports HTTP/1.1[0m" 404 -
+2026-04-17 23:15:44,985 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:15:44] "[33mGET /history/reports HTTP/1.1[0m" 404 -
+2026-04-17 23:16:43,337 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:16:43] "[33mGET /history/analyses HTTP/1.1[0m" 404 -
+2026-04-17 23:16:43,338 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:16:43] "[33mGET /history/analyses HTTP/1.1[0m" 404 -
+2026-04-17 23:16:43,341 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:16:43] "[33mGET /history/reports HTTP/1.1[0m" 404 -
+2026-04-17 23:16:43,345 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:16:43] "[33mGET /history/reports HTTP/1.1[0m" 404 -
+2026-04-17 23:16:51,018 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:16:51] "GET /history HTTP/1.1" 200 -
+2026-04-17 23:16:51,019 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:16:51] "GET /history HTTP/1.1" 200 -
+2026-04-17 23:18:24,445 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\gemini_helper.py', reloading
+2026-04-17 23:18:25,084 - werkzeug - INFO -  * Restarting with stat
+2026-04-17 23:18:28,440 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-17 23:18:28,457 - werkzeug - WARNING -  * Debugger is active!
+2026-04-17 23:18:28,463 - werkzeug - INFO -  * Debugger PIN: 141-379-729
+2026-04-17 23:19:57,436 - database - INFO - Connected to MongoDB
+2026-04-17 23:19:57,436 - database - INFO - Connected to MongoDB
+2026-04-17 23:19:57,715 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:19:57] "GET /profile HTTP/1.1" 200 -
+2026-04-17 23:19:58,416 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:19:58] "GET /profile HTTP/1.1" 200 -
+2026-04-17 23:23:36,531 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\database.py', reloading
+2026-04-17 23:23:37,350 - werkzeug - INFO -  * Restarting with stat
+2026-04-17 23:23:40,787 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-17 23:23:40,806 - werkzeug - WARNING -  * Debugger is active!
+2026-04-17 23:23:40,812 - werkzeug - INFO -  * Debugger PIN: 141-379-729
+2026-04-17 23:24:07,168 - database - INFO - Connected to MongoDB
+2026-04-17 23:24:07,370 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:24:07] "GET /history HTTP/1.1" 200 -
+2026-04-17 23:24:07,530 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:24:07] "GET /history HTTP/1.1" 200 -
+2026-04-17 23:24:26,786 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:24:26] "GET /history HTTP/1.1" 200 -
+2026-04-17 23:24:27,605 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:24:27] "GET /history HTTP/1.1" 200 -
+2026-04-17 23:24:28,300 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:24:28] "GET /history HTTP/1.1" 200 -
+2026-04-17 23:24:28,582 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:24:28] "GET /history HTTP/1.1" 200 -
+2026-04-17 23:26:49,265 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-17 23:26:49,291 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.90.187.65:5000
+2026-04-17 23:26:49,291 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2026-04-17 23:26:49,293 - werkzeug - INFO -  * Restarting with stat
+2026-04-17 23:26:51,859 - __main__ - INFO - Starting server at 0.0.0.0:5000
+2026-04-17 23:26:51,870 - werkzeug - WARNING -  * Debugger is active!
+2026-04-17 23:26:51,874 - werkzeug - INFO -  * Debugger PIN: 141-379-729
+2026-04-17 23:27:31,196 - database - INFO - Connected to MongoDB
+2026-04-17 23:27:31,709 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:27:31] "POST /auth/login HTTP/1.1" 200 -
+2026-04-17 23:27:33,040 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:27:33] "GET /history HTTP/1.1" 200 -
+2026-04-17 23:27:33,349 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:27:33] "GET /history HTTP/1.1" 200 -
+2026-04-17 23:28:23,855 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:28:23] "GET /history HTTP/1.1" 200 -
+2026-04-17 23:28:24,019 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:28:24] "GET /history HTTP/1.1" 200 -
+2026-04-17 23:29:05,613 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:29:05] "GET /profile HTTP/1.1" 200 -
+2026-04-17 23:29:05,817 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:29:05] "GET /profile HTTP/1.1" 200 -
+2026-04-17 23:30:09,713 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:30:09] "GET /history HTTP/1.1" 200 -
+2026-04-17 23:30:10,016 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:30:10] "GET /history HTTP/1.1" 200 -
+2026-04-17 23:30:18,947 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:30:18] "GET /history HTTP/1.1" 200 -
+2026-04-17 23:30:19,197 - werkzeug - INFO - 127.0.0.1 - - [17/Apr/2026 23:30:19] "GET /history HTTP/1.1" 200 -
+2026-04-17 23:33:28,665 - werkzeug - INFO -  * Detected change in 'C:\\fairhire-ai\\app.py', reloading
