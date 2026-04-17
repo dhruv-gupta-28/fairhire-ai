@@ -87,7 +87,7 @@ def analyze_bias(file_path, user_id=None, save_to_db=False):
         df_fairness['income_binary'] = df_fairness['income_binary'].astype(int)
     elif 'income' in df_fairness.columns:
         df_fairness['income_binary'] = df_fairness['income'].apply(
-            lambda x: 1 if '>50K' in str(x) else 0
+            lambda x: 1 if '>50k' in str(x).lower() else 0
         )
     else:
         raise ValueError("Target column missing")
@@ -99,12 +99,12 @@ def analyze_bias(file_path, user_id=None, save_to_db=False):
 
     # EDUCATION GROUP
     def education_group(x):
-        x = str(x).strip()
-        if x in {'Preschool','1st-4th','5th-6th','7th-8th','9th','10th','11th','12th'}:
+        x = str(x).strip().lower()
+        if x in {'preschool','1st-4th','5th-6th','7th-8th','9th','10th','11th','12th'}:
             return 'Basic'
-        elif x in {'HS-grad','Some-college','Assoc-acdm','Assoc-voc'}:
+        elif x in {'hs-grad','some-college','assoc-acdm','assoc-voc'}:
             return 'Intermediate'
-        elif x in {'Bachelors','Masters','Doctorate','Prof-school'}:
+        elif x in {'bachelors','masters','doctorate','prof-school'}:
             return 'Advanced'
         return 'Other'
 

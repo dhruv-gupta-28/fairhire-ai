@@ -46,21 +46,32 @@ class MLPipeline:
     def _preprocess(self, df_input, fit=True):
         df = df_input.copy()
 
-        # ---- CLEAN STRINGS (CRITICAL FIX) ----
-        for col in df.columns:
-            if df[col].dtype == object:
-                df[col] = df[col].astype(str).str.strip()
+        # ---- EDA: DROP DUPLICATES ----
+        df = df.drop_duplicates()
 
-        # ---- NUMERIC ----
+        # ---- EDA: CLEAN STRINGS & IMPUTE CATEGORICAL ----
+        for col in df.columns:
+            if df[col].dtype == object or df[col].dtype == str:
+                # Standardization
+                df[col] = df[col].astype(str).str.strip().str.lower()
+                # Missing Value Handling
+                df[col] = df[col].replace({'nan': np.nan, 'null': np.nan, '': np.nan, 'none': np.nan})
+                if df[col].isnull().any():
+                    mode_val = df[col].mode()
+                    if not mode_val.empty:
+                        df[col] = df[col].fillna(mode_val[0])
+                    else:
+                        df[col] = df[col].fillna('unknown')
+
+        # ---- EDA: IMPUTE NUMERICAL ----
         numeric_cols = ['age', 'education_num', 'hours_per_week']
         for col in numeric_cols:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors='coerce')
-
-        df = df.dropna()
-
-        if len(df) == 0:
-            raise ValueError("Data parse failure: All rows were corrupted or dropped. Please ensure 'age', 'education_num', and 'hours_per_week' are strictly numeric figures without strings or NaNs.")
+                # Missing Value Handling (Mean)
+                if df[col].isnull().any():
+                    mean_val = df[col].mean()
+                    df[col] = df[col].fillna(mean_val if not pd.isna(mean_val) else 0)
 
         # ---- DROP USELESS ----
         drop_cols = ['fnlwgt', 'native_country', 'capital_gain', 'capital_loss']
@@ -104,7 +115,7 @@ class MLPipeline:
         if 'income_binary' in df.columns:
             df['target'] = df['income_binary']
         elif 'income' in df.columns:
-            df['target'] = df['income'].apply(lambda x: 1 if '>50K' in str(x) else 0)
+            df['target'] = df['income'].apply(lambda x: 1 if '>50k' in str(x).lower() else 0)
         else:
             raise ValueError("Target column missing")
 
