@@ -72,7 +72,7 @@ def generate_suggestions(bias_data: Dict[str, Any]) -> Dict[str, Any]:
         prompt = _build_prompt(bias_data)
 
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-3-flash-preview",
             contents=prompt
         )
 
@@ -140,7 +140,7 @@ Rules:
 """
 
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-3-flash-preview",
             contents=prompt
         )
 
@@ -192,7 +192,7 @@ Rules:
 """
 
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-3-flash-preview",
             contents=prompt
         )
 
@@ -235,7 +235,7 @@ Rules:
 """
 
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-3-flash-preview",
             contents=prompt
         )
 
