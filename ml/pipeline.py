@@ -117,7 +117,10 @@ class MLPipeline:
         elif 'income' in df.columns:
             df['target'] = df['income'].apply(lambda x: 1 if '>50k' in str(x).lower() else 0)
         else:
-            raise ValueError("Target column missing")
+            raise ValueError("Target column missing. Ensure 'income' or 'income_binary' exists.")
+
+        if df['target'].nunique() < 2:
+            raise ValueError("Dataset requires at least two distinct target classes (e.g. both >50k and <=50k outcomes) to train the fairness model, but only one homogeneous class was found.")
 
         # ---- SPLIT ----
         train_df, test_df = train_test_split(
