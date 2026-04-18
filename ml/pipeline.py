@@ -12,7 +12,6 @@ from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 import logging
-import shap
 from fairness.metrics import FairnessMetrics
 from fairness.scoring import FairnessScore
 
@@ -46,6 +45,38 @@ class MLPipeline:
         col_str = str(col_name).lower()
         sensitive_keywords = ["gender", "sex", "race", "ethnicity", "age", "dob", "years"]
         return any(kw in col_str for kw in sensitive_keywords)
+
+    def _is_age_like(self, col_name: str) -> bool:
+        col = str(col_name).lower()
+        if col in {'age', 'dob'}:
+            return True
+        if 'date_of_birth' in col or 'birth_year' in col or 'birthdate' in col:
+            return True
+        if 'age' in col and 'experience' not in col and 'yr' not in col:
+            return True
+        return False
+
+    def _bucket_age_feature(self, series: pd.Series) -> pd.Series:
+        values = pd.to_numeric(series, errors='coerce')
+        if values.notnull().sum() < 2:
+            return pd.Series(['Unknown'] * len(series), index=series.index)
+
+        try:
+            bucketed = pd.qcut(values, q=5, duplicates='drop')
+        except Exception:
+            bins = [0, 24, 34, 44, 54, np.inf]
+            labels = ['18-24', '25-34', '35-44', '45-54', '55+']
+            bucketed = pd.cut(values, bins=bins, labels=labels, right=True)
+
+        return bucketed.astype(str).fillna('Unknown')
+
+    def _bucket_sensitive_attributes(self, X: pd.DataFrame) -> pd.DataFrame:
+        for col in X.columns:
+            if self._is_age_like(col):
+                numeric_values = pd.to_numeric(X[col], errors='coerce')
+                if numeric_values.notnull().sum() > 0 and numeric_values.nunique() > 8:
+                    X[f'{col}_group'] = self._bucket_age_feature(X[col])
+        return X
 
     def _detect_sensitive_group(self, df: pd.DataFrame, keywords: list) -> str:
         for col in df.columns:
@@ -97,6 +128,12 @@ class MLPipeline:
 
     def extract_shap(self, clf, X_train_raw, feature_names):
         try:
+            try:
+                import shap
+            except Exception as exc:
+                logger.warning(f"SHAP unavailable: {exc}")
+                return {"top_features": [], "feature_impact": {}}
+
             preprocessor = clf.named_steps['preprocessor']
             classifier = clf.named_steps['classifier']
             
@@ -190,6 +227,8 @@ class MLPipeline:
             if X.empty:
                 return {"error": "No usable features remain after purging constants/nulls.", "failed": True}
 
+            X = self._bucket_sensitive_attributes(X)
+
             numeric_features = []
             categorical_features = []
             
@@ -248,11 +287,19 @@ class MLPipeline:
                 y_pred_proba = y_pred
 
             y_classes = len(np.unique(y_test))
+            raw_age_col = self._detect_sensitive_group(X, ["age", "dob", "birth"])
+            age_col = raw_age_col
+            if raw_age_col and f"{raw_age_col}_group" in X.columns:
+                age_col = f"{raw_age_col}_group"
+
             sensitive_cols = {
                 "gender": self._detect_sensitive_group(X, ["gender", "sex", "male", "female"]),
                 "race": self._detect_sensitive_group(X, ["race", "ethnicity"]),
-                "age": self._detect_sensitive_group(X, ["age", "dob", "years"])
+                "age": age_col
             }
+
+            if age_col != raw_age_col and raw_age_col in sensitive_cols.values():
+                sensitive_cols = {k: v for k, v in sensitive_cols.items() if v != raw_age_col}
             
             sensitive_feature_values = {
                 key: X_test[col].astype(str).fillna("MISSING").tolist()

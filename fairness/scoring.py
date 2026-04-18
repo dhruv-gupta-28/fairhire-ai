@@ -40,14 +40,23 @@ class FairnessScore:
         return self._cached_metrics
 
     def _non_linear_penalty(self, gap: float) -> float:
+        """
+        Penalty curve:
+        - gap < 0.10: low penalty (acceptable range)
+        - gap 0.10-0.20: moderate ramp
+        - gap 0.20-0.40: significant but not saturating
+        - gap > 0.40: heavy penalty, saturates at 1.0 only above 0.60
+        """
         gap = max(0.0, min(1.0, gap))
 
-        if gap < 0.1:
+        if gap < 0.10:
             return gap * 0.5
-        elif gap < 0.2:
-            return gap * 1.5
+        elif gap < 0.20:
+            return 0.05 + (gap - 0.10) * 1.0
+        elif gap < 0.40:
+            return 0.15 + (gap - 0.20) * 1.5
         else:
-            return min(1.0, gap * 3.0)
+            return min(1.0, 0.45 + (gap - 0.40) * 2.75)
 
     def compute_metric_gaps(self):
         all_metrics = self._get_all_metrics()

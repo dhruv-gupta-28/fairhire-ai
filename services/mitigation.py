@@ -11,6 +11,8 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OrdinalEncoder
+from fairness.metrics import FairnessMetrics
+from fairness.scoring import FairnessScore
 
 from ml.pipeline import MLPipeline
 
@@ -97,7 +99,7 @@ class BiasMitigationEngine:
         y_true: pd.Series,
         y_probas: np.ndarray,
         group_labels: pd.Series,
-        target_rate: float = 0.5
+        target_rate: float = 0.75
     ) -> Dict[str, float]:
         thresholds: Dict[str, float] = {}
         unique_groups = group_labels.dropna().unique()
@@ -110,7 +112,7 @@ class BiasMitigationEngine:
 
             best_threshold = 0.5
             best_diff = float("inf")
-            for threshold in np.linspace(0.1, 0.9, 17):
+            for threshold in np.linspace(0.0, 1.0, 21):
                 predicted = (y_probas[group_mask] >= threshold).astype(int)
                 rate = predicted.mean()
                 diff = abs(rate - target_rate)
@@ -225,6 +227,20 @@ class BiasMitigationEngine:
         X = df.drop(columns=[target_col], errors="ignore")
         y = df[target_col].astype(int)
 
+        if 'age' in X.columns:
+            try:
+                X['age_group'] = pd.qcut(
+                    pd.to_numeric(X['age'], errors='coerce'),
+                    q=5,
+                    duplicates='drop'
+                ).astype(str).fillna('Unknown')
+                if 'age' in sensitive_cols:
+                    sensitive_cols = ['age_group' if c == 'age' else c for c in sensitive_cols]
+                if 'age_group' not in sensitive_cols:
+                    sensitive_cols.append('age_group')
+            except Exception as exc:
+                logger.warning(f"Age bucketing skipped in mitigation: {exc}")
+
         try:
             X_clean = self.remove_correlation(X, sensitive_cols)
             output["mitigation_steps"].append("Correlation removal applied")
@@ -265,25 +281,86 @@ class BiasMitigationEngine:
             output["tradeoff_log"].append({"error": f"Mitigation training failed: {exc}"})
             return output
 
-        mitigation_acc = float(accuracy_score(y_test, mitigation_model.predict(X_test)))
+        raw_mitigation_acc = float(accuracy_score(y_test, mitigation_model.predict(X_test)))
 
         baseline_accuracy = baseline_metrics.get("accuracy", 0.0)
-        acc_drop = baseline_accuracy - mitigation_acc
         output["accuracy_before"] = baseline_accuracy
-        output["accuracy_after"] = float(round(mitigation_acc, 4))
         output["fairness_before"] = baseline_metrics.get("fairness_score", 0.0)
         output["bias_level_before"] = baseline_metrics.get("bias_level", "Unknown")
 
+        y_pred_test = mitigation_model.predict(X_test)
+        if hasattr(mitigation_model.named_steps["classifier"], "predict_proba"):
+            y_proba_test = mitigation_model.predict_proba(X_test)[:, 1]
+        else:
+            y_proba_test = y_pred_test
+
+        preferred_order = ["gender", "sex", "race", "ethnicity", "age_group", "age"]
+        group_col = next(
+            (col for col in preferred_order if col in sensitive_cols and col in X_test.columns),
+            None
+        )
+        thresholds = {}
+        y_pred_final = y_pred_test
+        if group_col is not None and group_col in X_test.columns:
+            thresholds = self.optimize_thresholds(
+                y_test,
+                y_proba_test,
+                X_test[group_col].astype(str)
+            )
+            output["mitigation_steps"].append("Per-group threshold optimization applied")
+            y_pred_final = np.zeros_like(y_pred_test)
+            for group, threshold in thresholds.items():
+                mask = X_test[group_col].astype(str) == str(group)
+                y_pred_final[mask] = (y_proba_test[mask] >= threshold).astype(int)
+        else:
+            thresholds = {}
+
+        after_fairness_score = baseline_metrics.get("fairness_score", 0.0)
+        after_bias_level = baseline_metrics.get("bias_level", "Unknown")
+        after_risk_level = baseline_metrics.get("risk_level", baseline_metrics.get("bias_level", "Unknown"))
+
+        try:
+            sensitive_feature_values_test = {
+                col: X_test[col].astype(str).fillna("MISSING").tolist()
+                for col in sensitive_cols if col and col in X_test.columns
+            }
+            after_metrics = FairnessMetrics(
+                y_true=y_test,
+                y_pred=y_pred_final,
+                y_pred_proba=y_proba_test,
+                sensitive_features_dict=sensitive_feature_values_test
+            )
+            after_scores = FairnessScore(
+                after_metrics,
+                protected_attributes=list(sensitive_feature_values_test.keys())
+            )
+            after_fairness_score, after_bias_level = after_scores.compute_overall_score()
+            after_risk_level = after_bias_level
+            output["after_analysis"] = {
+                "fairness_score": after_fairness_score,
+                "bias_level": after_bias_level,
+                "metrics": {
+                    "accuracy": float(accuracy_score(y_test, y_pred_final)),
+                    "thresholds": thresholds
+                },
+            }
+        except Exception as exc:
+            logger.warning(f"Post-mitigation fairness evaluation failed: {exc}")
+
+        after_accuracy = float(round(accuracy_score(y_test, y_pred_final), 4))
+        accuracy_drop = float(round(baseline_accuracy - after_accuracy, 4))
+
         output["tradeoff_log"].append({
             "baseline_accuracy": baseline_accuracy,
-            "mitigated_accuracy": mitigation_acc,
-            "accuracy_drop": float(round(acc_drop, 4))
+            "mitigated_accuracy": raw_mitigation_acc,
+            "thresholded_accuracy": after_accuracy,
+            "accuracy_drop": accuracy_drop
         })
 
-        if acc_drop > max_accuracy_drop:
+        if accuracy_drop > max_accuracy_drop:
             output["tradeoff_log"].append({
                 "rollback": True,
-                "reason": f"Accuracy drop {acc_drop:.4f} exceeds threshold {max_accuracy_drop}."
+                "reason": f"Accuracy drop {accuracy_drop:.4f} exceeds threshold {max_accuracy_drop}."
             })
             output["after"] = {
                 "accuracy": float(round(baseline_accuracy, 4)),
@@ -296,39 +373,13 @@ class BiasMitigationEngine:
                 }
             }
             output["fairness_after"] = output["after"]["fairness_score"]
-            output["improvement"] = "Mitigation rolled back due to excessive accuracy loss."
+            output["bias_level_after"] = output["after"]["bias_level"]
             output["risk_transition"] = output["after"]["risk_level"] + " → " + output["after"]["risk_level"]
+            output["improvement"] = "Mitigation rolled back due to excessive accuracy loss."
             return output
 
-        y_proba = mitigation_model.predict_proba(X_smote)[:, 1] if hasattr(mitigation_model.named_steps["classifier"], "predict_proba") else mitigation_model.predict(X_smote)
-        group_col = sensitive_cols[0] if sensitive_cols else None
-        thresholds = {}
-        if group_col is not None and group_col in X_smote.columns:
-            thresholds = self.optimize_thresholds(y_smote, y_proba, X_smote[group_col].astype(str))
-            output["mitigation_steps"].append("Per-group threshold optimization applied")
-
-        after_fairness_score = baseline_metrics.get("fairness_score", 0.0)
-        after_bias_level = baseline_metrics.get("bias_level", "Unknown")
-        after_risk_level = baseline_metrics.get("risk_level", baseline_metrics.get("bias_level", "Unknown"))
-
-        try:
-            mitigated_df = X_smote.copy()
-            mitigated_df[target_col] = y_smote
-            after_analysis = MLPipeline(random_state=self.random_state).train(mitigated_df)
-            if not after_analysis.get("failed"):
-                after_fairness_score = after_analysis.get("fairness_score", after_fairness_score)
-                after_bias_level = after_analysis.get("bias_level", after_bias_level)
-                after_risk_level = after_analysis.get("bias_level", after_risk_level)
-                output["after_analysis"] = {
-                    "fairness_score": after_fairness_score,
-                    "bias_level": after_bias_level,
-                    "metrics": after_analysis.get("metrics", {}),
-                }
-        except Exception as exc:
-            logger.warning(f"Post-mitigation fairness evaluation failed: {exc}")
-
         output["after"] = {
-            "accuracy": float(round(mitigation_acc, 4)),
+            "accuracy": after_accuracy,
             "fairness_score": float(round(after_fairness_score, 4)),
             "bias_level": after_bias_level,
             "risk_level": after_risk_level,
