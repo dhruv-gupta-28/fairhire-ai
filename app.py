@@ -4,7 +4,12 @@ from flask_jwt_extended import get_jwt_identity, set_access_cookies, unset_jwt_c
 from bias_detector import analyze_bias
 from services.workflow import run_bias_mitigation_workflow
 from services.bias_firewall import firewall_check
-from gemini_helper import generate_impact_statement, generate_fix_plan
+from gemini_helper import (
+    generate_impact_statement,
+    generate_fix_plan,
+    generate_bias_explanation,
+    generate_compliance_report
+)
 import os
 import uuid
 import logging
@@ -248,17 +253,28 @@ def analyze():
 
     try:
         result = analyze_bias(str(file_path), user_id=user_id, save_to_db=True)
+        
+        final_score = result.get('fairness_score', result.get('final_score', 0))
+        bias_level = result.get('bias_level', result.get('bias_summary', {}).get('bias_level', 'Unknown'))
+        
+        standardized = {
+            "final_score": final_score,
+            "bias_level": bias_level,
+            "bias_detected": final_score < 80,
+            **result
+        }
+        
         History.create(
             user_id=user_id, 
             op_type="bias_detection", 
             input_meta={"filename": filename, "dataset_info": result.get('dataset_info', {})}, 
-            output_results={"fairness_score": result.get('fairness_score')}
+            output_results={"fairness_score": final_score}
         )
-        logger.info(f"Analysis completed for user {user_id}, score: {result.get('fairness_score', 'N/A')}")
-        return jsonify(result)
+        logger.info(f"Analysis completed for user {user_id}, score: {final_score}")
+        return jsonify(standardized)
     except Exception as e:
         logger.error(f"Analysis failed for user {user_id}: {e}", exc_info=True)
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "Analysis failed. Please check your data and try again.", "details": str(e)}), 400
     finally:
         if os.path.exists(file_path):
             os.remove(file_path)
@@ -297,20 +313,30 @@ def mitigate():
             df_cols = set(df.columns.tolist())
             sensitive_columns = [col for col in sensitive_columns if col in df_cols]
         result = run_bias_mitigation_workflow(df, sensitive_cols=sensitive_columns)
+        
+        before_score = result.get('before', {}).get('fairness_score', 0)
+        after_score = result.get('fairness_after', before_score)
+        
+        standardized = {
+            "final_score": after_score,
+            "fairness_before": before_score,
+            "fairness_after": after_score,
+            "bias_before": result.get('before', {}).get('bias_level', 'Unknown'),
+            "bias_after": result.get('after', {}).get('bias_level', result.get('before', {}).get('bias_level', 'Unknown')),
+            **result
+        }
+        
         History.create(
             user_id=user_id,
             op_type="bias_mitigation",
             input_meta={"filename": filename, "dataset_info": result.get('before', {})},
-            output_results={
-                "fairness_before": result.get('before', {}).get('fairness_score'),
-                "fairness_after": result.get('fairness_after')
-            }
+            output_results={"fairness_before": before_score, "fairness_after": after_score}
         )
-        logger.info(f"Mitigation completed for user {user_id}, before {result.get('before', {}).get('fairness_score')}, after {result.get('fairness_after')}")
-        return jsonify(result)
+        logger.info(f"Mitigation completed for user {user_id}, before {before_score}, after {after_score}")
+        return jsonify(standardized)
     except Exception as e:
         logger.error(f"Mitigation failed for user {user_id}: {e}", exc_info=True)
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "Mitigation failed. Please ensure your data format is valid.", "details": str(e)}), 400
     finally:
         if os.path.exists(file_path):
             os.remove(file_path)
@@ -377,9 +403,11 @@ def full_analysis():
         after_level = after.get('risk_level', after.get('bias_level', 'Unknown'))
         fairness_before = before.get('fairness_score', result.get('fairness_score', 0.0))
         fairness_after = after.get('fairness_score', fairness_before)
+        bias_detected = result.get('bias_detected', fairness_before < 80)
+        fairness_improvement = round(float(fairness_after - fairness_before), 2)
         human_summary = (
             f"The dataset audit showed bias in {before_level}. "
-            f"After mitigation, risk moved from {before_level} to {after_level} and fairness improved by {fairness_after - fairness_before:.2f}. "
+            f"After mitigation, risk moved from {before_level} to {after_level} and fairness changed by {fairness_improvement:.2f}. "
             f"This means the model is now safer to use but should remain monitored."
         )
 
@@ -387,12 +415,21 @@ def full_analysis():
             "audit": result.get('audit', {}),
             "before": before,
             "after": after,
+            "bias_detected": bias_detected,
+            "bias_before": before_level,
+            "bias_after": after_level,
+            "final_score": fairness_after,
+            "fairness_before": fairness_before,
+            "fairness_after": fairness_after,
+            "fairness_improvement": fairness_improvement,
+            "bias_reduction": f"{before_level} → {after_level}",
             "improvement": improvement,
             "risk_transition": risk_transition,
             "impact_statement": impact.get('impact', ''),
             "recommendations": plan.get('fix_plan', []),
             "human_summary": human_summary,
             "verdict": result.get("mitigation", {}).get("verdict", {}),
+            "ai_used": result.get("ai_used", False) or impact.get("ai_used", False) or plan.get("ai_used", False)
         }
 
         History.create(
@@ -409,7 +446,7 @@ def full_analysis():
         return jsonify(full_result)
     except Exception as e:
         logger.error(f"Full analysis failed for user {user_id}: {e}", exc_info=True)
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "Analysis and mitigation failed. Check your data.", "details": str(e)}), 400
     finally:
         if os.path.exists(file_path):
             os.remove(file_path)
@@ -478,6 +515,56 @@ def firewall():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/analyze_resume', methods=['POST'])
+@user_required
+def analyze_resume_alias():
+    return resume_route()
+
+
+@app.route('/match_job', methods=['POST'])
+@user_required
+def match_job_alias():
+    return job_matcher_route()
+
+
+@app.route('/bias_report', methods=['POST'])
+@user_required
+def bias_report():
+    return full_analysis()
+
+
+@app.route('/explanation', methods=['POST'])
+@user_required
+def explanation_route():
+    data = request.get_json() or {}
+    bias_data = data.get('bias_data', data)
+
+    if not bias_data:
+        return jsonify({"error": "No bias data provided"}), 400
+
+    try:
+        impact = generate_impact_statement(bias_data)
+        bias_explanation = generate_bias_explanation(bias_data)
+        compliance_report = generate_compliance_report(bias_data)
+        fix_plan = generate_fix_plan(bias_data)
+
+        return jsonify({
+            "impact_statement": impact.get("impact", ""),
+            "bias_explanation": bias_explanation.get("explanations", []),
+            "compliance_report": compliance_report.get("report", ""),
+            "fix_plan": fix_plan.get("fix_plan", []),
+            "ai_used": any([
+                impact.get("ai_used", False),
+                bias_explanation.get("ai_used", False),
+                compliance_report.get("ai_used", False),
+                fix_plan.get("ai_used", False)
+            ])
+        })
+    except Exception as e:
+        logger.error(f"Explanation generation failed: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
 # ---------------- RESUME ----------------
 @app.route('/resume/analyze', methods=['POST'])
 @user_required
@@ -504,20 +591,27 @@ def resume_route():
 
         result = analyze_resume(str(file_path))
         
-        # Store resume data into context
-        User.update_resume_data(user_id, result)
+        if result.get("error"):
+            return jsonify({"error": result["error"]}), 400
         
-        # Track History
+        standardized = {
+            "final_score": result.get("resume_score", 0),
+            **result
+        }
+        
+        User.update_resume_data(user_id, standardized)
+        
         History.create(
             user_id=user_id,
             op_type="resume_analysis",
             input_meta={"filename": filename},
             output_results={"resume_score": result.get("resume_score", 0)}
         )
-
-        return jsonify(result)
+        logger.info(f"Resume analyzed for user {user_id}, score: {result.get('resume_score', 0)}")
+        return jsonify(standardized)
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        logger.error(f"Resume analysis failed: {e}")
+        return jsonify({"error": "Resume analysis failed. Please check the file format.", "details": str(e)}), 400
     finally:
         if os.path.exists(file_path):
             os.remove(file_path)

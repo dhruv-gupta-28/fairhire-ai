@@ -8,7 +8,7 @@ from collections import OrderedDict
 from ml.pipeline import MLPipeline
 from services.dataset_auditor import DatasetAuditor
 from services.workflow import run_bias_mitigation_workflow
-from gemini_helper import generate_suggestions, generate_detailed_summary, generate_bias_explanation
+from gemini_helper import generate_suggestions, generate_detailed_summary, generate_bias_explanation, generate_impact_statement
 from config import MODEL_CACHE_MAX_SIZE
 from database import Analysis
 import numpy as np
@@ -101,8 +101,20 @@ def analyze_bias(file_path, user_id=None, save_to_db=False, run_mitigation=False
     }
 
     recommendations_result = generate_suggestions(bias_payload)
+    explanation_result = generate_bias_explanation(bias_payload)
+    detailed_summary_result = generate_detailed_summary(bias_payload)
+    impact_result = generate_impact_statement(bias_payload)
+
     pipeline_result["recommendations"] = recommendations_result["recommendations"]
-    pipeline_result["ai_used"] = recommendations_result["ai_used"]
+    pipeline_result["bias_explanation"] = explanation_result.get("explanations", [])
+    pipeline_result["detailed_summary"] = detailed_summary_result.get("summary", "")
+    pipeline_result["impact_statement"] = impact_result.get("impact", "")
+    pipeline_result["ai_used"] = any([
+        recommendations_result.get("ai_used", False),
+        explanation_result.get("ai_used", False),
+        detailed_summary_result.get("ai_used", False),
+        impact_result.get("ai_used", False)
+    ])
     pipeline_result["fairness_score"] = overall_score
     pipeline_result["gender_bias"] = gender_bias
 
@@ -134,15 +146,24 @@ def analyze_bias(file_path, user_id=None, save_to_db=False, run_mitigation=False
         "key_findings": human_summary
     }
 
+    bias_detected = overall_score < 80 or any(
+        item.get("severity") in ["WARNING", "CRITICAL"] for item in pipeline_result.get("bias_by_feature", [])
+    )
+
     response = {
         "audit": audit,
         "before": pipeline_result.copy(),
         "fairness_score": overall_score,
+        "final_score": overall_score,
         "bias_level": pipeline_result.get("bias_level", pipeline_result.get("bias_summary", {}).get("bias_level", "Unknown")),
+        "bias_detected": bias_detected,
         "bias_by_feature": pipeline_result.get("bias_by_feature", []),
         "selection_rates": pipeline_result.get("selection_rates", {}),
         "shap_summary": pipeline_result.get("shap_summary", {}),
         "human_readable": human_readable,
+        "bias_explanation": pipeline_result.get("bias_explanation", []),
+        "detailed_summary": pipeline_result.get("detailed_summary", ""),
+        "impact_statement": pipeline_result.get("impact_statement", ""),
         **pipeline_result
     }
 

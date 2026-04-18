@@ -1,4 +1,5 @@
 import os
+import json
 import logging
 from typing import List, Dict, Any
 
@@ -341,6 +342,88 @@ Rules:
     except Exception as e:
         logger.error(f"Gemini fix plan error: {e}")
         return {"fix_plan": _generate_offline_fix_plan(bias_data), "ai_used": False}
+
+
+def _parse_gemini_json(text: str) -> Dict[str, Any]:
+    try:
+        return json.loads(text.strip())
+    except Exception:
+        cleaned = text.strip().replace("\n", " ")
+        try:
+            start = cleaned.index("{")
+            end = cleaned.rindex("}") + 1
+            return json.loads(cleaned[start:end])
+        except Exception:
+            return {}
+
+
+def _build_resume_profile_prompt(resume_text: str) -> str:
+    return f"""
+You are an expert recruiter and resume analyst.
+
+Extract structured key fields from this resume text.
+
+Resume Text:
+{resume_text[:3000]}
+
+Requirements:
+- Return valid JSON only, no additional explanation.
+- Fields: skills, experience_years, education, career_focus, strengths.
+- skills: array of strings.
+- experience_years: integer.
+- education: array of strings.
+- career_focus: short phrase.
+- strengths: array of brief phrases.
+
+Example output:
+{{
+  "skills": ["Python", "Data Analysis"],
+  "experience_years": 5,
+  "education": ["Bachelor of Science in Computer Science"],
+  "career_focus": "Data science and AI engineering",
+  "strengths": ["problem solving", "cross-functional collaboration"]
+}}
+"""
+
+
+def _generate_offline_resume_profile(resume_text: str) -> Dict[str, Any]:
+    return {
+        "skills": [],
+        "experience_years": 0,
+        "education": [],
+        "career_focus": "Resume parsing fallback used.",
+        "strengths": [],
+    }
+
+
+def generate_resume_profile(resume_text: str) -> Dict[str, Any]:
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not GEMINI_AVAILABLE or not api_key:
+        logger.warning("Gemini not available, using offline resume profile fallback")
+        return {**_generate_offline_resume_profile(resume_text), "ai_used": False}
+
+    try:
+        client = genai.Client(api_key=api_key)
+        prompt = _build_resume_profile_prompt(resume_text)
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=prompt
+        )
+        parsed = _parse_gemini_json(response.text or "")
+        if not parsed:
+            return {**_generate_offline_resume_profile(resume_text), "ai_used": False}
+
+        return {
+            "skills": parsed.get("skills", []),
+            "experience_years": int(parsed.get("experience_years", 0) or 0),
+            "education": parsed.get("education", []),
+            "career_focus": parsed.get("career_focus", ""),
+            "strengths": parsed.get("strengths", []),
+            "ai_used": True,
+        }
+    except Exception as e:
+        logger.error(f"Gemini resume profile error: {e}")
+        return {**_generate_offline_resume_profile(resume_text), "ai_used": False}
 
 
 def _generate_offline_resume_summary(resume_text: str) -> str:

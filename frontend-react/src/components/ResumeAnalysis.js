@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
+import ScoreGauge from "./ScoreGauge";
 import {
   Upload,
   User,
@@ -65,26 +66,31 @@ const ResumeAnalysis = () => {
         },
       });
 
+      if (response.data.error) {
+        setError(response.data.error);
+        return;
+      }
       setResults(response.data);
     } catch (error) {
-      setError("Resume analysis failed");
+      const errorMsg =
+        error.response?.data?.error ||
+        "Resume analysis failed. Check file format and try again.";
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
-  };
-
-  const getScoreColor = (score) => {
-    if (score >= 80) return "text-green-400";
-    if (score >= 60) return "text-yellow-400";
-    return "text-red-400";
   };
 
   return (
     <div className="fade-in">
       {/* Header */}
       <div className="mb-5">
-        <h1 className="text-2xl font-bold text-white mb-1">Resume Analysis</h1>
-        <p className="text-gray-500 text-sm">Extract insights from PDF and DOCX resumes</p>
+        <h1 className="text-2xl font-bold text-white mb-1">
+          AI-Powered Fair Hiring Analysis
+        </h1>
+        <p className="text-gray-500 text-sm">
+          Extract insights from PDF and DOCX resumes
+        </p>
       </div>
 
       {/* Upload */}
@@ -101,10 +107,14 @@ const ResumeAnalysis = () => {
           <div className="text-center">
             <Upload className="mx-auto mb-3 w-8 h-8 text-gray-600" />
             {file ? (
-              <p className="text-green-400 text-sm font-medium">✓ {file.name}</p>
+              <p className="text-green-400 text-sm font-medium">
+                ✓ {file.name}
+              </p>
             ) : (
               <>
-                <p className="text-gray-300 text-sm mb-1">Drop your resume here</p>
+                <p className="text-gray-300 text-sm mb-1">
+                  Drop your resume here
+                </p>
                 <p className="text-gray-600 text-xs">Supports PDF and DOCX</p>
               </>
             )}
@@ -148,15 +158,56 @@ const ResumeAnalysis = () => {
       {/* Results */}
       {results && (
         <div className="grid grid-2 gap-4">
-          {/* Score */}
+          {/* Score Card */}
           <div className="stat-card flex flex-col items-center justify-center py-6">
             <h2 className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">
-              Resume Score
+              Resume Quality Score
             </h2>
-            <div className={`text-4xl font-bold ${getScoreColor(results.resume_score)}`}>
-              {results.resume_score}
-            </div>
+            <ScoreGauge score={results.final_score || results.resume_score} />
             <div className="text-gray-600 text-xs mt-1">/100</div>
+
+            {/* Quality Badge */}
+            <div
+              className={`badge mt-3 px-3 py-1 rounded-full text-xs font-semibold ${
+                (results.final_score || results.resume_score) >= 75
+                  ? "bg-green-500/20 text-green-400 border border-green-500/40"
+                  : (results.final_score || results.resume_score) >= 50
+                    ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/40"
+                    : "bg-red-500/20 text-red-400 border border-red-500/40"
+              }`}
+            >
+              Quality:{" "}
+              {(results.final_score || results.resume_score) >= 75
+                ? "Strong"
+                : (results.final_score || results.resume_score) >= 50
+                  ? "Moderate"
+                  : "Needs Work"}
+            </div>
+
+            {/* Bias Detected */}
+            <p className="text-xs text-gray-400 mt-2">
+              Bias Detected: {results.bias_detected ? "Yes ⚠️" : "No ✅"}
+            </p>
+
+            {/* Decision Label */}
+            <p className="text-xs text-gray-400 mt-1">
+              Decision:{" "}
+              {(results.final_score || results.resume_score) > 75
+                ? "Selected (High Confidence) ✅"
+                : "Needs Improvement ❌"}
+            </p>
+
+            {/* AI Insight Card */}
+            {results.impact_statement && (
+              <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                <p className="text-xs text-blue-400 font-semibold mb-1">
+                  💡 AI Decision Explanation
+                </p>
+                <p className="text-xs text-blue-400">
+                  {results.impact_statement}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* AI Summary */}
@@ -164,9 +215,12 @@ const ResumeAnalysis = () => {
             <div className="card flex flex-col justify-center">
               <h3 className="section-heading text-sm">AI Summary</h3>
               <div className="text-gray-400 text-xs leading-relaxed space-y-2">
-                {results.ai_summary.split('\n').filter(p => p.trim() !== '').map((para, i) => (
-                  <p key={i}>{para}</p>
-                ))}
+                {results.ai_summary
+                  .split("\n")
+                  .filter((p) => p.trim() !== "")
+                  .map((para, i) => (
+                    <p key={i}>{para}</p>
+                  ))}
               </div>
             </div>
           )}
@@ -177,20 +231,36 @@ const ResumeAnalysis = () => {
             <div className="space-y-2">
               <div className="info-row">
                 <User className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                <span className="text-gray-300 text-xs">{results.name || "Not found"}</span>
+                <span className="text-gray-300 text-xs">
+                  {results.name || "Not found"}
+                </span>
               </div>
               <div className="info-row">
                 <Mail className="w-4 h-4 text-green-400 flex-shrink-0" />
-                <span className="text-gray-300 text-xs">{results.email || "Not found"}</span>
+                <span className="text-gray-300 text-xs">
+                  {results.email || "Not found"}
+                </span>
               </div>
               <div className="info-row">
                 <Phone className="w-4 h-4 text-purple-400 flex-shrink-0" />
-                <span className="text-gray-300 text-xs">{results.phone || "Not found"}</span>
+                <span className="text-gray-300 text-xs">
+                  {results.phone || "Not found"}
+                </span>
               </div>
               <div className="info-row">
                 <Award className="w-4 h-4 text-yellow-400 flex-shrink-0" />
-                <span className="text-gray-300 text-xs">{results.experience_years || 0} years experience</span>
+                <span className="text-gray-300 text-xs">
+                  {results.experience_years || 0} years experience
+                </span>
               </div>
+              {results.career_focus && (
+                <div className="info-row">
+                  <FileText className="w-4 h-4 text-teal-400 flex-shrink-0" />
+                  <span className="text-gray-300 text-xs">
+                    {results.career_focus}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -200,13 +270,31 @@ const ResumeAnalysis = () => {
               <h3 className="section-heading text-sm">Skills Detected</h3>
               <div className="flex flex-wrap gap-1.5">
                 {results.skills.map((skill, i) => (
-                  <span key={i} className="skill-tag">{skill}</span>
+                  <span key={i} className="skill-tag">
+                    {skill}
+                  </span>
                 ))}
               </div>
             </div>
           )}
 
           {/* Recommendations */}
+          {results.strengths && results.strengths.length > 0 && (
+            <div className="card">
+              <h3 className="section-heading text-sm">Key Strengths</h3>
+              <div className="flex flex-wrap gap-2">
+                {results.strengths.map((item, i) => (
+                  <span
+                    key={i}
+                    className="skill-tag bg-blue-500/10 text-blue-200"
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
           {results.recommendations && results.recommendations.length > 0 && (
             <div className="card">
               <h3 className="section-heading text-sm">Recommendations</h3>

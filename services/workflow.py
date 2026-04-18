@@ -294,12 +294,8 @@ def run_bias_mitigation_workflow(
                 "accuracy": round(aggressive_accuracy, 4),
                 "risk_level": "low_bias" if aggressive_fairness > 70 else "moderate_bias",
                 "reliability": aggressive_reliability,
-                "decision": "not_suitable_for_production" if aggressive_reliability == "low" else "acceptable_tradeoff"
+                "decision": "use_with_caution" if aggressive_reliability == "low" else "acceptable_tradeoff"
             }
-        },
-        "deployment_status": {
-            "safe_mode": "deployable",
-            "aggressive_mode": "not_deployable"
         },
         "tradeoff": {
             "fairness_improvement": f"+{round(aggressive_fairness - baseline_fairness, 2)}",
@@ -311,8 +307,7 @@ def run_bias_mitigation_workflow(
             "type": core_issue,
             "explanation": "The dataset reflects historical bias where one group dominates positive outcomes." if core_issue == "structural_bias" else "Model learned biased patterns from training data.",
             "technical_reason": "Model learns biased patterns, so correcting them conflicts with original labels." if core_issue == "structural_bias" else "Training data contained biased representations.",
-            "not_a_bug": True,
-            "confidence": 0.92
+            "not_a_bug": True
         },
         "risk_assessment": {
             "bias_risk": {

@@ -4,7 +4,7 @@ from typing import Dict, Any, List
 import logging
 import os
 from docx import Document
-from gemini_helper import generate_resume_summary
+from gemini_helper import generate_resume_summary, generate_resume_profile
 
 logger = logging.getLogger(__name__)
 
@@ -69,8 +69,23 @@ def analyze_resume(file_path: str) -> Dict[str, Any]:
         experience = extract_experience(text)
         education = extract_education(text)
 
-        score = calculate_resume_score(skills, experience, education)
         summary_result = generate_resume_summary(text)
+        profile_result = generate_resume_profile(text)
+
+        profile_skills = profile_result.get("skills") or []
+        if profile_skills:
+            skills = sorted({skill.title() for skill in profile_skills})
+
+        profile_experience = profile_result.get("experience_years")
+        if profile_experience:
+            experience = int(profile_experience)
+
+        profile_education = profile_result.get("education") or []
+        if profile_education:
+            education = sorted({item.title() for item in profile_education})
+
+        score = calculate_resume_score(skills, experience, education)
+        ai_used = bool(summary_result.get("ai_used", False) or profile_result.get("ai_used", False))
 
         return {
             "name": name,
@@ -79,10 +94,13 @@ def analyze_resume(file_path: str) -> Dict[str, Any]:
             "skills": skills,
             "experience_years": experience,
             "education": education,
+            "career_focus": profile_result.get("career_focus", ""),
+            "strengths": profile_result.get("strengths", []),
             "resume_score": score,
             "recommendations": generate_recommendations(skills, experience, education),
             "ai_summary": summary_result.get("summary", ""),
-            "ai_used": summary_result.get("ai_used", False)
+            "ai_used": ai_used,
+            "resume_profile": profile_result
         }
 
     except Exception as e:

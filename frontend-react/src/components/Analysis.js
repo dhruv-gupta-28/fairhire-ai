@@ -23,12 +23,14 @@ const normalizeScore = (value) => {
 const normalizeAnalysisResults = (data) => {
   const normalizedScore =
     normalizeScore(data?.fairness_score) ??
+    normalizeScore(data?.final_score) ??
     normalizeScore(data?.before?.fairness_score) ??
     normalizeScore(data?.bias_summary?.fairness_score);
 
   return {
     ...data,
     fairness_score: normalizedScore,
+    summary: data?.detailed_summary || data?.summary || "",
     bias_level:
       data?.bias_level ??
       data?.before?.bias_level ??
@@ -138,7 +140,9 @@ const Analysis = () => {
     <div className="fade-in">
       {/* Header */}
       <div className="mb-5">
-        <h1 className="text-2xl font-bold text-white mb-1">Bias Analysis</h1>
+        <h1 className="text-2xl font-bold text-white mb-1">
+          AI-Powered Fair Hiring Analysis
+        </h1>
         <p className="text-gray-500 text-sm">
           Upload hiring data to detect bias patterns
         </p>
@@ -249,6 +253,34 @@ const Analysis = () => {
                     {results.bias_level}
                   </div>
                 )}
+
+                {/* Bias Detected */}
+                <p className="text-xs text-gray-400 mt-2">
+                  Bias Detected: {results.bias_detected ? "Yes ⚠️" : "No ✅"}
+                </p>
+
+                {/* Bias Improvement */}
+                {results.bias_before && results.bias_after && (
+                  <p className="text-xs text-gray-400 mt-1">
+                    Bias Improvement: {results.bias_before} →{" "}
+                    {results.bias_after}
+                  </p>
+                )}
+
+                {/* Bias Mitigation Success */}
+                {results.bias_before && results.bias_after && (
+                  <p className="text-xs text-green-400 mt-1">
+                    ✔ Bias Mitigation Applied Successfully
+                  </p>
+                )}
+
+                {/* Decision Label */}
+                <p className="text-xs text-gray-400 mt-1">
+                  Decision:{" "}
+                  {results.fairness_score > 75
+                    ? "Selected (High Confidence) ✅"
+                    : "Needs Improvement ❌"}
+                </p>
               </>
             ) : (
               <div className="text-gray-500 text-sm">
@@ -271,6 +303,28 @@ const Analysis = () => {
                   .map((para, i) => (
                     <p key={i}>{para}</p>
                   ))}
+              </div>
+            </div>
+          )}
+
+          {results.impact_statement && (
+            <div className="card">
+              <h3 className="section-heading text-sm">Impact Statement</h3>
+              <p className="text-gray-400 text-xs leading-relaxed">
+                {results.impact_statement}
+              </p>
+            </div>
+          )}
+
+          {results.bias_explanation && results.bias_explanation.length > 0 && (
+            <div className="card">
+              <h3 className="section-heading text-sm">Bias Explanation</h3>
+              <div className="space-y-2">
+                {results.bias_explanation.map((item, i) => (
+                  <div key={i} className="text-gray-300 text-xs">
+                    • {item}
+                  </div>
+                ))}
               </div>
             </div>
           )}
