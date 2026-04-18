@@ -285,6 +285,7 @@ class MLPipeline:
             fairness_metrics_summary = fairness_scores.get_detailed_breakdown()
             all_fairness_metrics = fairness_metrics.all_metrics()
             fairness_score_value, score_severity = fairness_scores.compute_overall_score()
+            fairness = self.compute_fairness(X_test, y_pred, sensitive_cols)
 
             try:
                 if 'cat' in clf.named_steps['preprocessor'].named_transformers_:

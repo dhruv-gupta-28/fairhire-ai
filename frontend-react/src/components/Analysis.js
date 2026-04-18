@@ -1,7 +1,41 @@
 import React, { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
-import { Upload, AlertCircle, CheckCircle, Download, BarChart3 } from "lucide-react";
+import {
+  Upload,
+  AlertCircle,
+  CheckCircle,
+  Download,
+  BarChart3,
+} from "lucide-react";
+
+const normalizeScore = (value) => {
+  const parsed =
+    typeof value === "number"
+      ? value
+      : typeof value === "string"
+        ? Number(value)
+        : NaN;
+
+  return Number.isFinite(parsed) ? Math.round(parsed * 100) / 100 : null;
+};
+
+const normalizeAnalysisResults = (data) => {
+  const normalizedScore =
+    normalizeScore(data?.fairness_score) ??
+    normalizeScore(data?.before?.fairness_score) ??
+    normalizeScore(data?.bias_summary?.fairness_score);
+
+  return {
+    ...data,
+    fairness_score: normalizedScore,
+    bias_level:
+      data?.bias_level ??
+      data?.before?.bias_level ??
+      data?.bias_summary?.bias_level ??
+      null,
+  };
+};
 
 const Analysis = () => {
   const [file, setFile] = useState(null);
@@ -54,9 +88,17 @@ const Analysis = () => {
         },
       });
 
-      setResults(response.data);
+      // Check if response contains error flag from backend
+      if (response.data.error || response.data.failed) {
+        throw new Error(response.data.error || "Analysis failed on backend");
+      }
+
+      setResults(normalizeAnalysisResults(response.data));
     } catch (error) {
-      setError(error.response?.data?.error || "Analysis failed.");
+      const errorMessage =
+        error.response?.data?.error || error.message || "Analysis failed.";
+      setError(errorMessage);
+      console.error("Analysis error details:", error);
     } finally {
       setLoading(false);
     }
@@ -69,7 +111,7 @@ const Analysis = () => {
 
     try {
       const response = await axios.post("/report", results, {
-        responseType: "blob"
+        responseType: "blob",
       });
 
       const blob = new Blob([response.data]);
@@ -97,7 +139,9 @@ const Analysis = () => {
       {/* Header */}
       <div className="mb-5">
         <h1 className="text-2xl font-bold text-white mb-1">Bias Analysis</h1>
-        <p className="text-gray-500 text-sm">Upload hiring data to detect bias patterns</p>
+        <p className="text-gray-500 text-sm">
+          Upload hiring data to detect bias patterns
+        </p>
       </div>
 
       {/* Upload Card */}
@@ -114,10 +158,14 @@ const Analysis = () => {
           <div className="text-center">
             <Upload className="mx-auto mb-3 w-8 h-8 text-gray-600" />
             {file ? (
-              <p className="text-green-400 text-sm font-medium">✓ {file.name}</p>
+              <p className="text-green-400 text-sm font-medium">
+                ✓ {file.name}
+              </p>
             ) : (
               <>
-                <p className="text-gray-300 text-sm mb-1">Drop your CSV file here</p>
+                <p className="text-gray-300 text-sm mb-1">
+                  Drop your CSV file here
+                </p>
                 <p className="text-gray-600 text-xs">or click to browse</p>
               </>
             )}
@@ -174,7 +222,8 @@ const Analysis = () => {
       {/* Success Banner */}
       {results && (
         <div className="mb-5 bg-green-500/10 border border-green-500/20 text-green-400 px-3 py-2 rounded-lg flex items-center justify-center text-xs">
-          <CheckCircle className="mr-2 w-4 h-4" /> Analysis completed successfully
+          <CheckCircle className="mr-2 w-4 h-4" /> Analysis completed
+          successfully
         </div>
       )}
 
@@ -186,10 +235,29 @@ const Analysis = () => {
             <h2 className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">
               Fairness Score
             </h2>
-            <div className={`text-4xl font-bold ${getScoreColor(results.fairness_score)}`}>
-              {results.fairness_score}
-            </div>
-            <div className="text-gray-600 text-xs mt-1">/100</div>
+            {results.fairness_score !== undefined &&
+            results.fairness_score !== null ? (
+              <>
+                <div
+                  className={`text-4xl font-bold ${getScoreColor(results.fairness_score)}`}
+                >
+                  {results.fairness_score}
+                </div>
+                <div className="text-gray-600 text-xs mt-1">/100</div>
+                {results.bias_level && (
+                  <div className="text-gray-500 text-xs mt-3 px-2 py-1 bg-gray-800/50 rounded">
+                    {results.bias_level}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-gray-500 text-sm">
+                N/A
+                <div className="text-xs mt-2 text-gray-600">
+                  Score unavailable
+                </div>
+              </div>
+            )}
           </div>
 
           {/* AI Summary */}
@@ -197,9 +265,12 @@ const Analysis = () => {
             <div className="card">
               <h3 className="section-heading text-sm">AI Summary</h3>
               <div className="text-gray-400 text-xs leading-relaxed space-y-2">
-                {results.summary.split('\n').filter(p => p.trim() !== '').map((para, i) => (
-                  <p key={i}>{para}</p>
-                ))}
+                {results.summary
+                  .split("\n")
+                  .filter((p) => p.trim() !== "")
+                  .map((para, i) => (
+                    <p key={i}>{para}</p>
+                  ))}
               </div>
             </div>
           )}
@@ -209,24 +280,39 @@ const Analysis = () => {
             <div className="card">
               <h3 className="section-heading text-sm">Bias Breakdown</h3>
               <div className="space-y-2">
-                {results.gender_bias && Object.entries(results.gender_bias).map(([k, v]) => (
-                  <div key={k} className="info-row">
-                    <span className="text-gray-400 text-xs flex-1">Gender: {k}</span>
-                    <span className="text-white text-xs font-mono">{(v * 100).toFixed(1)}%</span>
-                  </div>
-                ))}
-                {results.age_bias && Object.entries(results.age_bias).map(([k, v]) => (
-                  <div key={k} className="info-row">
-                    <span className="text-gray-400 text-xs flex-1">Age: {k}</span>
-                    <span className="text-white text-xs font-mono">{(v * 100).toFixed(1)}%</span>
-                  </div>
-                ))}
-                {results.race_bias && Object.entries(results.race_bias).map(([k, v]) => (
-                  <div key={k} className="info-row">
-                    <span className="text-gray-400 text-xs flex-1">Race: {k}</span>
-                    <span className="text-white text-xs font-mono">{(v * 100).toFixed(1)}%</span>
-                  </div>
-                ))}
+                {results.gender_bias &&
+                  Object.entries(results.gender_bias).map(([k, v]) => (
+                    <div key={k} className="info-row">
+                      <span className="text-gray-400 text-xs flex-1">
+                        Gender: {k}
+                      </span>
+                      <span className="text-white text-xs font-mono">
+                        {(v * 100).toFixed(1)}%
+                      </span>
+                    </div>
+                  ))}
+                {results.age_bias &&
+                  Object.entries(results.age_bias).map(([k, v]) => (
+                    <div key={k} className="info-row">
+                      <span className="text-gray-400 text-xs flex-1">
+                        Age: {k}
+                      </span>
+                      <span className="text-white text-xs font-mono">
+                        {(v * 100).toFixed(1)}%
+                      </span>
+                    </div>
+                  ))}
+                {results.race_bias &&
+                  Object.entries(results.race_bias).map(([k, v]) => (
+                    <div key={k} className="info-row">
+                      <span className="text-gray-400 text-xs flex-1">
+                        Race: {k}
+                      </span>
+                      <span className="text-white text-xs font-mono">
+                        {(v * 100).toFixed(1)}%
+                      </span>
+                    </div>
+                  ))}
               </div>
             </div>
           )}
