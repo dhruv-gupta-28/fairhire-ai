@@ -13,7 +13,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 import logging
 import shap
-from .metrics import FairnessMetrics
+from fairness.metrics import FairnessMetrics
 from fairness.scoring import FairnessScore
 
 logger = logging.getLogger(__name__)
