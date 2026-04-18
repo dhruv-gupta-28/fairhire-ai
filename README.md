@@ -25,24 +25,28 @@ Artificial intelligence is increasingly used for hiring decisions, loan approval
 FairHire AI is a comprehensive platform that:
 
 ### 1. **Detects Bias** 🔍
+
 - Uploads any CSV dataset
 - Analyzes demographic disparities using fairness metrics
 - Identifies which features drive biased outcomes
 - Calculates fairness scores (0-100)
 
 ### 2. **Fixes Bias** ⚙️
+
 - Applies reweighting, SMOTE oversampling, correlation removal
 - Optimizes decision thresholds per demographic group
 - Ensures accuracy doesn't suffer significantly from mitigation
 - Rolls back unsafe changes automatically
 
 ### 3. **Explains Decisions** 📊
+
 - Uses SHAP (Shapley Additive Explanations) for per-instance interpretability
 - Shows which features contributed to each prediction
 - Flags sensitive attributes that influenced decisions
 - Provides human-readable summaries
 
 ### 4. **Real-Time Firewall** 🛡️
+
 - Evaluates individual predictions for bias risk
 - Flags high-risk decisions before they're acted upon
 - Detects group disparities in real time
@@ -52,22 +56,23 @@ FairHire AI is a comprehensive platform that:
 
 ## 🌟 Key Features
 
-| Feature | Description |
-|---------|-------------|
-| **Dataset Audit** | Comprehensive data quality and bias pre-flight checks |
-| **Bias Detection** | Advanced fairness metrics (demographic parity, equalized odds, disparate impact) |
-| **Bias Mitigation** | Multi-step mitigation pipeline with safety rollback |
-| **Explainability** | SHAP-based instance-level feature importance |
-| **Bias Firewall** | Real-time prediction monitoring and flagging |
-| **Full Analysis** | Single-endpoint orchestration of entire bias lifecycle |
-| **Gemini AI** | NLP-powered summaries and recommendations |
-| **User Management** | JWT authentication, rate limiting, audit logs |
+| Feature             | Description                                                                      |
+| ------------------- | -------------------------------------------------------------------------------- |
+| **Dataset Audit**   | Comprehensive data quality and bias pre-flight checks                            |
+| **Bias Detection**  | Advanced fairness metrics (demographic parity, equalized odds, disparate impact) |
+| **Bias Mitigation** | Multi-step mitigation pipeline with safety rollback                              |
+| **Explainability**  | SHAP-based instance-level feature importance                                     |
+| **Bias Firewall**   | Real-time prediction monitoring and flagging                                     |
+| **Full Analysis**   | Single-endpoint orchestration of entire bias lifecycle                           |
+| **Gemini AI**       | NLP-powered summaries and recommendations                                        |
+| **User Management** | JWT authentication, rate limiting, audit logs                                    |
 
 ---
 
 ## 🛠️ Technology Stack
 
 ### Backend
+
 - **Framework:** Flask (Python 3.10+)
 - **ML:** scikit-learn, pandas, numpy
 - **Fairness:** SHAP, custom fairness metrics
@@ -77,6 +82,7 @@ FairHire AI is a comprehensive platform that:
 - **AI:** Google GenAI SDK (Gemini 3.1 Pro)
 
 ### Frontend
+
 - **Framework:** React 18 (Context API for state)
 - **Styling:** Tailwind CSS, PostCSS
 - **HTTP:** Axios with interceptors
@@ -84,6 +90,7 @@ FairHire AI is a comprehensive platform that:
 - **File Upload:** React Dropzone
 
 ### Deployment
+
 - **Backend:** Gunicorn on Render
 - **Frontend:** React static build on Render/Netlify
 - **Database:** MongoDB Atlas (serverless)
@@ -94,6 +101,7 @@ FairHire AI is a comprehensive platform that:
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Python 3.10+
 - Node.js 16+
 - MongoDB Atlas account
@@ -102,12 +110,14 @@ FairHire AI is a comprehensive platform that:
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/yourusername/fairhire-ai.git
    cd fairhire-ai
    ```
 
 2. **Backend setup**
+
    ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
@@ -115,6 +125,7 @@ FairHire AI is a comprehensive platform that:
    ```
 
 3. **Environment configuration**
+
    ```bash
    cp .env.example .env
    # Edit .env with your credentials:
@@ -124,6 +135,7 @@ FairHire AI is a comprehensive platform that:
    ```
 
 4. **Frontend setup**
+
    ```bash
    cd frontend-react
    npm install
@@ -132,10 +144,11 @@ FairHire AI is a comprehensive platform that:
    ```
 
 5. **Run locally**
+
    ```bash
    # Terminal 1: Backend
    python app.py
-   
+
    # Terminal 2: Frontend (for development)
    cd frontend-react
    npm start
@@ -145,26 +158,57 @@ Visit `http://localhost:3000` and the API at `http://localhost:5000`.
 
 ---
 
+## ⚡ Try It in 60 Seconds
+
+Don't want to set up the full stack? Test bias detection instantly:
+
+1. **Start the backend:**
+
+   ```bash
+   python app.py
+   ```
+
+2. **In another terminal, run:**
+
+   ```bash
+   curl -X POST http://localhost:5000/full-analysis \
+     -F "file=@sample_data_hiring.csv"
+   ```
+
+3. **Expected output (in ~10 seconds):**
+   - Dataset audit results
+   - Fairness score **before mitigation**: ~42 (High Risk)
+   - Fairness score **after mitigation**: ~68 (Moderate Risk)
+   - Human-readable summary explaining bias reduction
+   - AI-generated recommendations
+
+**The entire bias detection → mitigation → explanation pipeline in one request.**
+
+---
+
 ## 📡 API Endpoints
 
 ### Core Analysis
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/analyze` | POST | Detect bias in dataset |
-| `/mitigate` | POST | Run bias mitigation pipeline |
-| `/full-analysis` | POST | Complete bias lifecycle (audit → detect → mitigate → explain) |
+
+| Endpoint         | Method | Description                                                   |
+| ---------------- | ------ | ------------------------------------------------------------- |
+| `/analyze`       | POST   | Detect bias in dataset                                        |
+| `/mitigate`      | POST   | Run bias mitigation pipeline                                  |
+| `/full-analysis` | POST   | Complete bias lifecycle (audit → detect → mitigate → explain) |
 
 ### Supporting
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/firewall` | POST | Real-time bias risk evaluation for predictions |
-| `/auth/register` | POST | Create user account |
-| `/auth/login` | POST | Login with email/password |
-| `/profile` | GET/PUT/DELETE | Manage user profile |
-| `/resume/analyze` | POST | Extract and score resume |
-| `/jobs` | GET | Search jobs (Adzuna API) |
+
+| Endpoint          | Method         | Description                                    |
+| ----------------- | -------------- | ---------------------------------------------- |
+| `/firewall`       | POST           | Real-time bias risk evaluation for predictions |
+| `/auth/register`  | POST           | Create user account                            |
+| `/auth/login`     | POST           | Login with email/password                      |
+| `/profile`        | GET/PUT/DELETE | Manage user profile                            |
+| `/resume/analyze` | POST           | Extract and score resume                       |
+| `/jobs`           | GET            | Search jobs (Adzuna API)                       |
 
 ### Example Request: Full Analysis
+
 ```bash
 curl -X POST http://localhost:5000/full-analysis \
   -H "Authorization: Bearer <TOKEN>" \
@@ -173,31 +217,64 @@ curl -X POST http://localhost:5000/full-analysis \
 ```
 
 ### Example Response
+
 ```json
 {
   "audit": {
-    "warnings": [],
-    "summary": "Dataset passed audit",
-    "severity": "INFO"
+    "warnings": [
+      {
+        "type": "CLASS_IMBALANCE",
+        "message": "Target variable imbalance: 35% positive, 65% negative",
+        "severity": "INFO"
+      }
+    ],
+    "summary": "Dataset audit completed with 1 warning.",
+    "severity": "INFO",
+    "severity_counts": { "INFO": 1 },
+    "details": {
+      "missing_values": 0,
+      "duplicate_rows": 0,
+      "sensitive_columns_detected": ["gender", "age"],
+      "proxy_variables": [
+        {
+          "feature": "years_experience",
+          "sensitive_attribute": "age",
+          "correlation": 0.78,
+          "severity": "CRITICAL"
+        }
+      ]
+    }
   },
   "before": {
     "fairness_score": 42,
     "bias_level": "High Risk",
-    "accuracy": 0.78
+    "accuracy": 0.78,
+    "metrics": {
+      "demographic_parity_gap_gender": 0.22,
+      "equalized_odds_tpr_gap": 0.18,
+      "disparate_impact_ratio": 0.68
+    }
   },
   "after": {
     "fairness_score": 68,
     "bias_level": "Moderate Risk",
-    "accuracy": 0.76
+    "accuracy": 0.76,
+    "metrics": {
+      "demographic_parity_gap_gender": 0.08,
+      "equalized_odds_tpr_gap": 0.06,
+      "disparate_impact_ratio": 0.92
+    }
   },
-  "improvement": "Mitigation completed with 4 steps",
+  "improvement": "Mitigation completed with 4 steps: correlation_removal, smote, reweighting, threshold_optimization",
   "risk_transition": "High Risk → Moderate Risk",
-  "impact_statement": "This model reduces selection chances for females by 22%",
+  "impact_statement": "The model was 22% less likely to hire female candidates. After bias mitigation, this gap reduced to 8%, significantly improving fairness while maintaining 76% accuracy.",
   "recommendations": [
-    "Rebalance dataset for underrepresented groups",
-    "Review feature selection for proxies",
-    "Adjust model decision thresholds"
-  ]
+    "Continue monitoring demographic parity gaps quarterly",
+    "Review hiring criteria to reduce proxy variable influence (years_experience correlates 0.78 with age)",
+    "Implement human review process for borderline predictions (confidence < 0.65)",
+    "Rebalance training data collection to avoid historical hiring bias"
+  ],
+  "human_summary": "The dataset audit showed bias in High Risk. After mitigation, risk moved from High Risk → Moderate Risk and fairness improved by +26 points. This means the model is now safer to use but should remain monitored for bias drift."
 }
 ```
 
@@ -253,6 +330,7 @@ fairhire-ai/
 ## 🧪 Testing
 
 ### Manual Testing
+
 ```bash
 # Test bias detection
 curl -X POST http://localhost:5000/analyze \
@@ -279,11 +357,13 @@ curl -X POST http://localhost:5000/full-analysis \
    - `FLASK_ENV=production`
 
 3. **Configure build command:**
+
    ```bash
    bash build.sh
    ```
 
 4. **Configure start command:**
+
    ```bash
    gunicorn app:app
    ```
@@ -296,6 +376,7 @@ curl -X POST http://localhost:5000/full-analysis \
 ## 📊 How It Works
 
 ### Bias Detection Pipeline
+
 1. **Load Data:** Parse CSV, validate structure
 2. **Audit:** Check for quality issues, missing values, class imbalance
 3. **Train Model:** Logistic regression or Random Forest
@@ -303,6 +384,7 @@ curl -X POST http://localhost:5000/full-analysis \
 5. **Generate Summary:** Human-readable insights
 
 ### Bias Mitigation Pipeline
+
 1. **Baseline:** Establish current performance/fairness
 2. **Correlation Removal:** De-correlate features from sensitive attributes
 3. **SMOTE:** Oversample underrepresented groups
@@ -312,6 +394,7 @@ curl -X POST http://localhost:5000/full-analysis \
 7. **Post-Evaluation:** Re-compute fairness on mitigated model
 
 ### Explainability Flow
+
 1. **SHAP Values:** Compute Shapley values for each feature
 2. **Feature Contributions:** Quantify impact of each attribute
 3. **Sensitive Flag:** Alert if protected attributes influenced decision
@@ -369,6 +452,7 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 ## 📞 Support
 
 For questions or issues:
+
 - Open an issue on GitHub
 - Email: support@fairhire-ai.com
 - Documentation: [https://docs.fairhire-ai.com](https://docs.fairhire-ai.com)
