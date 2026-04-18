@@ -18,7 +18,7 @@ from config import (
     MAX_FILE_SIZE
 )
 from auth import init_jwt, login_user, register_user, user_required
-from database import Analysis, Report, User, History
+from database import Analysis, Report, User, History, db_manager, init_indexes
 from werkzeug.utils import secure_filename
 import time
 from resume_analyzer import analyze_resume
@@ -86,10 +86,30 @@ app = Flask(__name__, static_url_path='/react_static_bypass', static_folder=FRON
 # Restrict CORS to localhost and future prod URL
 CORS(app, supports_credentials=True, origins=["http://localhost:3000", "http://127.0.0.1:3000", "https://fairhire-prod-url.ai"])
 
+API_PREFIXES = (
+    "auth/",
+    "analyze",
+    "mitigate",
+    "full-analysis",
+    "report",
+    "firewall",
+    "resume",
+    "job",
+    "history",
+    "health",
+    "profile",
+)
+
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
     from flask import send_from_directory
+    if path.startswith(API_PREFIXES):
+        return jsonify({"error": "Not found"}), 404
+    if not os.path.isdir(FRONTEND_FOLDER):
+        if path:
+            return jsonify({"error": "Frontend build not found"}), 404
+        return jsonify({"status": "FairHire API Running"}), 200
     if path != "" and os.path.exists(os.path.join(FRONTEND_FOLDER, path)):
         return send_from_directory(FRONTEND_FOLDER, path)
     else:
@@ -97,6 +117,11 @@ def serve(path):
 
 # ---------------- JWT ----------------
 init_jwt(app)
+with app.app_context():
+    try:
+        init_indexes()
+    except Exception as e:
+        logger.warning(f"Index initialization skipped: {e}")
 
 # ---------------- RATE LIMIT ----------------
 from database import RateLimit
@@ -112,6 +137,10 @@ def login():
 
     if not data or 'email' not in data or 'password' not in data:
         return jsonify({"error": "Email and password required"}), 400
+
+    client_id = data.get('email', request.remote_addr)
+    if not check_rate_limit(client_id, 'login', limit=5, window=300):
+        return jsonify({"error": "Too many login attempts. Try again in 5 minutes."}), 429
 
     result = login_user(data['email'], data['password'])
 
@@ -264,6 +293,9 @@ def mitigate():
 
     try:
         df = pd.read_csv(file_path)
+        if sensitive_columns:
+            df_cols = set(df.columns.tolist())
+            sensitive_columns = [col for col in sensitive_columns if col in df_cols]
         result = run_bias_mitigation_workflow(df, sensitive_cols=sensitive_columns)
         History.create(
             user_id=user_id,
@@ -312,6 +344,10 @@ def full_analysis():
         sensitive_columns = [col.strip() for col in raw.split(',') if col.strip()]
 
     try:
+        df = pd.read_csv(file_path)
+        if sensitive_columns:
+            df_cols = set(df.columns.tolist())
+            sensitive_columns = [col for col in sensitive_columns if col in df_cols]
         result = analyze_bias(
             str(file_path),
             user_id=user_id,
@@ -355,7 +391,8 @@ def full_analysis():
             "risk_transition": risk_transition,
             "impact_statement": impact.get('impact', ''),
             "recommendations": plan.get('fix_plan', []),
-            "human_summary": human_summary
+            "human_summary": human_summary,
+            "verdict": result.get("mitigation", {}).get("verdict", {}),
         }
 
         History.create(
@@ -430,7 +467,7 @@ def firewall():
     if not data:
         return jsonify({"error": "No input data"}), 400
 
-    bias_file = data.get("bias_file", str(DEFAULT_DATASET_PATH))
+    bias_file = str(DEFAULT_DATASET_PATH)
 
     try:
         bias_data = analyze_bias(bias_file)
@@ -522,7 +559,7 @@ def job_matcher_route():
         # 2. fetch jobs based on skills
         # Get location and limit from form data if provided
         location = request.form.get('location', 'us')
-        limit = int(request.form.get('limit', 10))
+        limit = min(int(request.form.get('limit', 10)), 20)
         
         jobs_data = fetch_jobs(skills, location=location, limit=limit)
         jobs = jobs_data.get('jobs', [])
@@ -602,7 +639,12 @@ def get_user_history():
 # ---------------- HEALTH ----------------
 @app.route('/health')
 def health():
-    return jsonify({"status": "OK"})
+    try:
+        db_manager.ensure_connection()
+        db_manager.client.admin.command('ping')
+        return jsonify({"status": "OK", "db": "connected"})
+    except Exception as e:
+        return jsonify({"status": "degraded", "db": str(e)}), 503
 
 
 @app.route('/')

@@ -8,7 +8,11 @@ from imblearn.over_sampling import SMOTE
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OrdinalEncoder
+
+from ml.pipeline import MLPipeline
 
 logger = logging.getLogger(__name__)
 
@@ -47,10 +51,25 @@ class BiasMitigationEngine:
         if len(y.unique()) < 2:
             return X, y
 
+        cat_cols = X.select_dtypes(include=["object", "category"]).columns.tolist()
+        X_encoded = X.copy()
+        encoder = OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-1)
+
+        if cat_cols:
+            X_encoded[cat_cols] = encoder.fit_transform(X[cat_cols].astype(str))
+
         try:
             smote = SMOTE(random_state=self.random_state)
-            X_res, y_res = smote.fit_resample(X, y)
-            return pd.DataFrame(X_res, columns=X.columns), pd.Series(y_res, name=y.name)
+            X_res, y_res = smote.fit_resample(X_encoded, y)
+            X_res = pd.DataFrame(X_res, columns=X.columns)
+
+            if cat_cols:
+                encoded_values = np.round(X_res[cat_cols].values).astype(int)
+                max_categories = np.array([len(categories) - 1 for categories in encoder.categories_], dtype=int)
+                encoded_values = np.clip(encoded_values, 0, max_categories)
+                X_res[cat_cols] = encoder.inverse_transform(encoded_values)
+
+            return X_res, pd.Series(y_res, name=y.name)
         except Exception as exc:
             logger.warning(f"SMOTE failed: {exc}")
             return X, y
@@ -103,17 +122,81 @@ class BiasMitigationEngine:
         return thresholds
 
     def _train_model(self, X: pd.DataFrame, y: pd.Series, sample_weight: Optional[np.ndarray] = None) -> Tuple[Pipeline, float]:
-        model = LogisticRegression(class_weight="balanced", max_iter=3000, random_state=self.random_state)
-        clf = Pipeline(steps=[("classifier", model)])
+        from sklearn.compose import ColumnTransformer
+        from sklearn.impute import SimpleImputer
+        from sklearn.preprocessing import OneHotEncoder, StandardScaler
+
+        numeric_cols = X.select_dtypes(include=["number"]).columns.tolist()
+        categorical_cols = X.select_dtypes(include=["object", "category"]).columns.tolist()
+
+        transformers = []
+        if numeric_cols:
+            transformers.append(
+                (
+                    "num",
+                    Pipeline(
+                        steps=[
+                            ("imputer", SimpleImputer(strategy="mean")),
+                            ("scaler", StandardScaler()),
+                        ]
+                    ),
+                    numeric_cols,
+                )
+            )
+        if categorical_cols:
+            transformers.append(
+                (
+                    "cat",
+                    Pipeline(
+                        steps=[
+                            ("imputer", SimpleImputer(strategy="most_frequent")),
+                            (
+                                "onehot",
+                                OneHotEncoder(
+                                    handle_unknown="ignore", sparse_output=False
+                                ),
+                            ),
+                        ]
+                    ),
+                    categorical_cols,
+                )
+            )
+
+        preprocessor = ColumnTransformer(transformers=transformers)
+
         try:
+            clf = Pipeline(
+                steps=[
+                    ("preprocessor", preprocessor),
+                    (
+                        "classifier",
+                        LogisticRegression(
+                            class_weight="balanced",
+                            max_iter=3000,
+                            random_state=self.random_state,
+                        ),
+                    ),
+                ]
+            )
             clf.fit(X, y, classifier__sample_weight=sample_weight)
         except Exception:
-            model = RandomForestClassifier(class_weight="balanced", random_state=self.random_state)
-            clf = Pipeline(steps=[("classifier", model)])
+            clf = Pipeline(
+                steps=[
+                    ("preprocessor", preprocessor),
+                    (
+                        "classifier",
+                        RandomForestClassifier(
+                            class_weight="balanced", random_state=self.random_state
+                        ),
+                    ),
+                ]
+            )
             clf.fit(X, y)
 
-        preds = clf.predict(X)
-        acc = float(accuracy_score(y, preds))
+        _, X_val, _, y_val = train_test_split(
+            X, y, test_size=0.2, random_state=self.random_state
+        )
+        acc = float(accuracy_score(y_val, clf.predict(X_val)))
         return clf, acc
 
     def mitigate_and_retrain(
@@ -149,31 +232,46 @@ class BiasMitigationEngine:
             X_clean = X.copy()
             logger.warning(f"Correlation removal skipped: {exc}")
 
+        X_train, X_test, y_train, y_test = train_test_split(
+            X_clean,
+            y,
+            test_size=0.2,
+            random_state=self.random_state,
+            stratify=y if len(pd.Series(y).unique()) > 1 else None
+        )
+
         try:
-            X_smote, y_smote = self.apply_smote(X_clean, y, sensitive_cols)
-            if len(y_smote) > len(y):
+            X_smote, y_smote = self.apply_smote(X_train, y_train, sensitive_cols)
+            if len(y_smote) > len(y_train):
                 output["mitigation_steps"].append("SMOTE oversampling applied")
             else:
-                X_smote, y_smote = X_clean, y
+                X_smote, y_smote = X_train, y_train
         except Exception as exc:
-            X_smote, y_smote = X_clean, y
+            X_smote, y_smote = X_train, y_train
             logger.warning(f"SMOTE step failed: {exc}")
 
-        sample_weights = self.reweigh(df, target_col, sensitive_cols)
-        output["mitigation_steps"].append("Reweighing applied")
+        sample_weights = None
+        try:
+            reweigh_df = X_smote.copy()
+            reweigh_df[target_col] = y_smote.values
+            sample_weights = self.reweigh(reweigh_df, target_col, sensitive_cols)
+            output["mitigation_steps"].append("Reweighing applied")
+        except Exception as exc:
+            logger.warning(f"Reweighing failed: {exc}")
 
         try:
-            mitigation_model, mitigation_acc = self._train_model(X_smote, y_smote, sample_weight=sample_weights)
+            mitigation_model, _ = self._train_model(X_smote, y_smote, sample_weight=sample_weights)
         except Exception as exc:
             output["tradeoff_log"].append({"error": f"Mitigation training failed: {exc}"})
             return output
+
+        mitigation_acc = float(accuracy_score(y_test, mitigation_model.predict(X_test)))
 
         baseline_accuracy = baseline_metrics.get("accuracy", 0.0)
         acc_drop = baseline_accuracy - mitigation_acc
         output["accuracy_before"] = baseline_accuracy
         output["accuracy_after"] = float(round(mitigation_acc, 4))
         output["fairness_before"] = baseline_metrics.get("fairness_score", 0.0)
-        output["fairness_after"] = baseline_metrics.get("fairness_score", 0.0)
         output["bias_level_before"] = baseline_metrics.get("bias_level", "Unknown")
 
         output["tradeoff_log"].append({
@@ -205,8 +303,8 @@ class BiasMitigationEngine:
         y_proba = mitigation_model.predict_proba(X_smote)[:, 1] if hasattr(mitigation_model.named_steps["classifier"], "predict_proba") else mitigation_model.predict(X_smote)
         group_col = sensitive_cols[0] if sensitive_cols else None
         thresholds = {}
-        if group_col is not None and group_col in df.columns:
-            thresholds = self.optimize_thresholds(y_smote, y_proba, df[group_col].astype(str))
+        if group_col is not None and group_col in X_smote.columns:
+            thresholds = self.optimize_thresholds(y_smote, y_proba, X_smote[group_col].astype(str))
             output["mitigation_steps"].append("Per-group threshold optimization applied")
 
         after_fairness_score = baseline_metrics.get("fairness_score", 0.0)

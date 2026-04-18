@@ -55,6 +55,14 @@ class DatabaseManager:
 db_manager = DatabaseManager()
 
 
+def init_indexes():
+    db_manager.ensure_connection()
+    db_manager.db.rate_limits.create_index("timestamp", expireAfterSeconds=120)
+    db_manager.db.users.create_index("email", unique=True)
+    db_manager.db.analyses.create_index([("user_id", 1), ("created_at", -1)])
+    db_manager.db.history.create_index([("user_id", 1), ("created_at", -1)])
+
+
 def get_users_collection():
     db_manager.ensure_connection()
     return db_manager.db.users

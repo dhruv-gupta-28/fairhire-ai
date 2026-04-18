@@ -230,5 +230,5 @@ def match_candidate(resume_text: str, job_description: str) -> Dict[str, Any]:
     return job_matcher.match_candidate(resume_text, job_description)
 
 
-def fetch_jobs(skills: List[str], location: str = "us", limit: int = 5) -> List[Dict[str, Any]]:
+def fetch_jobs(skills: List[str], location: str = "us", limit: int = 5) -> Dict[str, Any]:
     return job_matcher.fetch_jobs(skills, location, limit)

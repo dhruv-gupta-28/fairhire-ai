@@ -12,6 +12,7 @@ from flask import jsonify
 from database import User
 from config import JWT_SECRET_KEY
 import logging
+import os
 from functools import wraps
 from datetime import timedelta
 
@@ -22,10 +23,11 @@ jwt = JWTManager()
 
 def init_jwt(app):
     app.config['JWT_SECRET_KEY'] = JWT_SECRET_KEY
-    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False
+    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=8)
     app.config['JWT_TOKEN_LOCATION'] = ['cookies']
-    app.config['JWT_COOKIE_SECURE'] = False
+    app.config['JWT_COOKIE_SECURE'] = os.getenv('FLASK_ENV') == 'production'
     app.config['JWT_COOKIE_SAMESITE'] = 'Lax'
+    # CSRF disabled until frontend sends X-CSRF-TOKEN on mutating requests. Track: GitHub Issue #XX
     app.config['JWT_COOKIE_CSRF_PROTECT'] = False
     jwt.init_app(app)
 

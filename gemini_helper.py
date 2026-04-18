@@ -9,6 +9,7 @@ except ImportError:
     GEMINI_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
+GEMINI_MODEL = "gemini-1.5-pro"
 
 FALLBACK_SUGGESTIONS = [
     "Review hiring criteria to ensure fairness across groups.",
@@ -71,7 +72,7 @@ def generate_suggestions(bias_data: Dict[str, Any]) -> Dict[str, Any]:
         prompt = _build_prompt(bias_data)
 
         response = client.models.generate_content(
-            model="gemini-3.1-pro-preview",
+            model=GEMINI_MODEL,
             contents=prompt
         )
 
@@ -139,7 +140,7 @@ Rules:
 """
 
         response = client.models.generate_content(
-            model="gemini-3.1-pro-preview",
+            model=GEMINI_MODEL,
             contents=prompt
         )
 
@@ -192,7 +193,7 @@ Rules:
 """
 
         response = client.models.generate_content(
-            model="gemini-3.1-pro-preview",
+            model=GEMINI_MODEL,
             contents=prompt
         )
 
@@ -263,7 +264,7 @@ Rules:
 - Focus on the candidate impact or group disadvantage
 """
         response = client.models.generate_content(
-            model="gemini-3.1-pro-preview",
+            model=GEMINI_MODEL,
             contents=prompt
         )
         impact = response.text.strip()
@@ -297,7 +298,7 @@ Rules:
 - Include a high-level action recommendation
 """
         response = client.models.generate_content(
-            model="gemini-3.1-pro-preview",
+            model=GEMINI_MODEL,
             contents=prompt
         )
         report = response.text.strip()
@@ -330,7 +331,7 @@ Rules:
 - Keep each action under 6 words
 """
         response = client.models.generate_content(
-            model="gemini-3.1-pro-preview",
+            model=GEMINI_MODEL,
             contents=prompt
         )
         plan = _clean_response(response.text)
@@ -370,7 +371,7 @@ Rules:
 """
 
         response = client.models.generate_content(
-            model="gemini-3.1-pro-preview",
+            model=GEMINI_MODEL,
             contents=prompt
         )
 

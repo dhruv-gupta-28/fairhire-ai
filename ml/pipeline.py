@@ -248,14 +248,6 @@ class MLPipeline:
                 y_pred_proba = y_pred
 
             y_classes = len(np.unique(y_test))
-            metrics = {
-                "accuracy": float(accuracy_score(y_test, y_pred)),
-                "precision": float(precision_score(y_test, y_pred, zero_division=0, average='macro' if y_classes > 2 else 'binary')),
-                "recall": float(recall_score(y_test, y_pred, zero_division=0, average='macro' if y_classes > 2 else 'binary')),
-                "f1_score": float(f1_score(y_test, y_pred, zero_division=0, average='macro' if y_classes > 2 else 'binary')),
-                "roc_auc": float(roc_auc_score(y_test, y_pred_proba) if y_classes == 2 else 0.0)
-            }
-
             sensitive_cols = {
                 "gender": self._detect_sensitive_group(X, ["gender", "sex", "male", "female"]),
                 "race": self._detect_sensitive_group(X, ["race", "ethnicity"]),
