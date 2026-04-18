@@ -1,6 +1,7 @@
 venv/
 __pycache__/
 *.pyc
+*.log
 .env
 .idea/
 .vscode/
@@ -10,3 +11,13 @@ dist/
 build/
 *.pdf
 *.docx
+uploads/
+reports/
+models/
+.DS_Store
+*.swp
+*.swo
+.pytest_cache/
+.coverage
+.env.local
+.env.*.local

@@ -13,6 +13,8 @@ from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 import logging
 import shap
+from .metrics import FairnessMetrics
+from fairness.scoring import FairnessScore
 
 logger = logging.getLogger(__name__)
 
@@ -114,14 +116,21 @@ class MLPipeline:
                 shap_vals = shap_vals[1]
                 
             importances = np.abs(shap_vals).mean(0)
+            mean_signed = np.mean(shap_vals, axis=0)
             
             if len(feature_names) == len(importances):
                 feat_dict = {str(k): float(v) for k, v in zip(feature_names, importances)}
+                signed_dict = {str(k): float(v) for k, v in zip(feature_names, mean_signed)}
                 sorted_feats = sorted(feat_dict.items(), key=lambda x: x[1], reverse=True)
+                positive = sorted(signed_dict.items(), key=lambda x: x[1], reverse=True)[:5]
+                negative = sorted(signed_dict.items(), key=lambda x: x[1])[:5]
                 
                 return {
                     "top_features": [f[0] for f in sorted_feats[:5]],
-                    "feature_impact": {f[0]: float(round(f[1],4)) for f in sorted_feats[:10]}
+                    "feature_impact": {f[0]: float(round(f[1],4)) for f in sorted_feats[:10]},
+                    "top_positive_features": [f[0] for f in positive],
+                    "top_negative_features": [f[0] for f in negative],
+                    "signed_feature_contributions": {k: float(round(v, 4)) for k, v in signed_dict.items()}
                 }
         except Exception as e:
             logger.warning(f"SHAP extraction failed: {e}")
@@ -253,7 +262,29 @@ class MLPipeline:
                 "age": self._detect_sensitive_group(X, ["age", "dob", "years"])
             }
             
-            fairness = self.compute_fairness(X_test, y_pred, sensitive_cols)
+            sensitive_feature_values = {
+                key: X_test[col].astype(str).fillna("MISSING").tolist()
+                for key, col in sensitive_cols.items() if col and col in X_test.columns
+            }
+
+            metrics = {
+                "accuracy": float(accuracy_score(y_test, y_pred)),
+                "precision": float(precision_score(y_test, y_pred, zero_division=0, average='macro' if y_classes > 2 else 'binary')),
+                "recall": float(recall_score(y_test, y_pred, zero_division=0, average='macro' if y_classes > 2 else 'binary')),
+                "f1_score": float(f1_score(y_test, y_pred, zero_division=0, average='macro' if y_classes > 2 else 'binary')),
+                "roc_auc": float(roc_auc_score(y_test, y_pred_proba) if y_classes == 2 else 0.0)
+            }
+
+            fairness_metrics = FairnessMetrics(
+                y_true=y_test,
+                y_pred=y_pred,
+                y_pred_proba=y_pred_proba,
+                sensitive_features_dict=sensitive_feature_values
+            )
+            fairness_scores = FairnessScore(fairness_metrics, protected_attributes=list(sensitive_feature_values.keys()))
+            fairness_metrics_summary = fairness_scores.get_detailed_breakdown()
+            all_fairness_metrics = fairness_metrics.all_metrics()
+            fairness_score_value, score_severity = fairness_scores.compute_overall_score()
 
             try:
                 if 'cat' in clf.named_steps['preprocessor'].named_transformers_:
@@ -269,46 +300,75 @@ class MLPipeline:
 
             class_dist = {str(k): int(v) for k, v in pd.Series(y).value_counts().items()}
             
-            # Global insight extraction
-            global_insight = "Analysis completed smoothly. No prominent mathematical biases identified."
-            highest_score = -1.0
-            highest_level = "Low Bias"
-            for attr, rep in fairness.items():
-                if rep["score"] > highest_score:
-                    highest_score = rep["score"]
-                    highest_level = rep["bias_level"]
-                    if rep["disparity"] > 0.1:
-                        global_insight = rep["insight"]
+            selection_rates = {
+                attr: all_fairness_metrics.get(attr, {}).get('demographic_parity', {}).get('by_group', {})
+                for attr in sensitive_feature_values.keys()
+            }
 
-            bar_chart = [{"name": k[:15], "value": v} for k, v in shap_data.get("feature_impact", {}).items()]
-            pie_chart = [{"name": f"Class {k}", "value": v} for k, v in class_dist.items()]
-            
-            fairness_chart = []
-            if "gender" in fairness:
-                fairness_chart = [{"group": k, "rate": v['rate']} for k, v in fairness["gender"]["groups"].items()]
-            elif fairness:
-                first_key = list(fairness.keys())[0]
-                fairness_chart = [{"group": k, "rate": v['rate']} for k, v in fairness[first_key]["groups"].items()]
+            bias_by_feature = []
+            for attr, metrics_summary in fairness_metrics_summary['metric_gaps'].items():
+                attr_info = {
+                    "attribute": attr,
+                    "demographic_parity_gap": metrics_summary.get('demographic_parity_gap', 0.0),
+                    "equalized_odds_gap": float(round((metrics_summary.get('equalized_odds_tpr_gap', 0.0) + metrics_summary.get('equalized_odds_fpr_gap', 0.0)) / 2, 4)),
+                    "disparate_impact_gap": metrics_summary.get('disparate_impact_gap', 0.0),
+                    "calibration_gap": metrics_summary.get('calibration_gap', 0.0),
+                    "severity": fairness_scores.get_severity_level(max(
+                        metrics_summary.get('demographic_parity_gap', 0.0),
+                        metrics_summary.get('equalized_odds_tpr_gap', 0.0),
+                        metrics_summary.get('equalized_odds_fpr_gap', 0.0),
+                        metrics_summary.get('disparate_impact_gap', 0.0),
+                        metrics_summary.get('calibration_gap', 0.0)
+                    ))
+                }
+                bias_by_feature.append(attr_info)
 
-            return {
+            bias_level = "Low Risk"
+            if fairness_score_value < 40:
+                bias_level = "High Risk"
+            elif fairness_score_value < 70:
+                bias_level = "Moderate Risk"
+
+            standard_output = {
                 "metrics": metrics,
+                "model_performance": metrics,
                 "target_column": target_col,
                 "target_confidence": conf,
                 "class_distribution": class_dist,
+                "selection_rates": selection_rates,
+                "bias_by_feature": bias_by_feature,
+                "fairness_score": fairness_score_value,
+                "bias_level": bias_level,
+                "fairness_metrics": fairness_metrics_summary,
+                "shap_summary": {
+                    "top_positive_features": shap_data.get('top_positive_features', []),
+                    "top_negative_features": shap_data.get('top_negative_features', []),
+                    "feature_impact": shap_data.get('feature_impact', {}),
+                    "shap_note": "Top features are based on average SHAP contribution magnitude."
+                },
                 "fairness": fairness,
                 "bias_summary": {
-                    "overall_severity": highest_level,
-                    "fairness_score": float(100 - min(highest_score * 100, 99))
+                    "overall_severity": score_severity,
+                    "fairness_score": fairness_score_value,
+                    "bias_level": bias_level
                 },
                 "feature_importance": shap_data,
-                "insight": global_insight,
+                "insight": "Analysis completed smoothly. No prominent mathematical biases identified." if fairness_score_value >= 70 else "Fairness issues detected; review disparities in protected groups.",
                 "charts": {
-                    "bar_chart": bar_chart,
-                    "pie_chart": pie_chart,
-                    "fairness_chart": fairness_chart
+                    "bar_chart": [{"name": k[:15], "value": v} for k, v in shap_data.get("feature_impact", {}).items()],
+                    "pie_chart": [{"name": f"Class {k}", "value": v} for k, v in class_dist.items()],
+                    "fairness_chart": []
                 },
                 "predictions_sample": y_pred[:10].tolist()
             }
+
+            if "gender" in fairness:
+                standard_output["charts"]["fairness_chart"] = [{"group": k, "rate": v['rate']} for k, v in fairness["gender"]["groups"].items()]
+            elif fairness:
+                first_key = list(fairness.keys())[0]
+                standard_output["charts"]["fairness_chart"] = [{"group": k, "rate": v['rate']} for k, v in fairness[first_key]["groups"].items()]
+
+            return standard_output
             
         except Exception as e:
             return {"error": str(e), "failed": True}

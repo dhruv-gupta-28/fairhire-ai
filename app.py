@@ -2,10 +2,13 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from flask_jwt_extended import get_jwt_identity, set_access_cookies, unset_jwt_cookies
 from bias_detector import analyze_bias
-from firewall import firewall_check
+from services.workflow import run_bias_mitigation_workflow
+from services.bias_firewall import firewall_check
+from gemini_helper import generate_impact_statement, generate_fix_plan
 import os
 import uuid
 import logging
+import pandas as pd
 from report_generator import generate_report
 from config import (
     FLASK_HOST, FLASK_PORT, FLASK_DEBUG,
@@ -226,6 +229,149 @@ def analyze():
         return jsonify(result)
     except Exception as e:
         logger.error(f"Analysis failed for user {user_id}: {e}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+
+@app.route('/mitigate', methods=['POST'])
+@user_required
+def mitigate():
+    from flask_jwt_extended import get_jwt_identity
+    user_id = get_jwt_identity()
+    cleanup_orphaned_uploads()
+
+    if not check_rate_limit(user_id, 'mitigate'):
+        return jsonify({"error": "Rate limit exceeded"}), 429
+
+    if 'file' not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
+
+    file = request.files['file']
+    validation = validate_file(file, ['csv'])
+    if not validation['valid']:
+        return jsonify({"error": validation['error']}), 400
+
+    filename = secure_filename(f"{uuid.uuid4()}.csv")
+    file_path = UPLOAD_FOLDER / filename
+    file.save(file_path)
+
+    sensitive_columns = None
+    if 'sensitive_columns' in request.form:
+        raw = request.form.get('sensitive_columns', '')
+        sensitive_columns = [col.strip() for col in raw.split(',') if col.strip()]
+
+    try:
+        df = pd.read_csv(file_path)
+        result = run_bias_mitigation_workflow(df, sensitive_cols=sensitive_columns)
+        History.create(
+            user_id=user_id,
+            op_type="bias_mitigation",
+            input_meta={"filename": filename, "dataset_info": result.get('before', {})},
+            output_results={
+                "fairness_before": result.get('before', {}).get('fairness_score'),
+                "fairness_after": result.get('fairness_after')
+            }
+        )
+        logger.info(f"Mitigation completed for user {user_id}, before {result.get('before', {}).get('fairness_score')}, after {result.get('fairness_after')}")
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"Mitigation failed for user {user_id}: {e}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+
+@app.route('/full-analysis', methods=['POST'])
+@user_required
+def full_analysis():
+    from flask_jwt_extended import get_jwt_identity
+    user_id = get_jwt_identity()
+    cleanup_orphaned_uploads()
+
+    if not check_rate_limit(user_id, 'full_analysis'):
+        return jsonify({"error": "Rate limit exceeded"}), 429
+
+    if 'file' not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
+
+    file = request.files['file']
+    validation = validate_file(file, ['csv'])
+    if not validation['valid']:
+        return jsonify({"error": validation['error']}), 400
+
+    filename = secure_filename(f"{uuid.uuid4()}.csv")
+    file_path = UPLOAD_FOLDER / filename
+    file.save(file_path)
+
+    sensitive_columns = None
+    if 'sensitive_columns' in request.form:
+        raw = request.form.get('sensitive_columns', '')
+        sensitive_columns = [col.strip() for col in raw.split(',') if col.strip()]
+
+    try:
+        result = analyze_bias(
+            str(file_path),
+            user_id=user_id,
+            save_to_db=True,
+            run_mitigation=True,
+            sensitive_columns=sensitive_columns
+        )
+
+        mitigation_result = result.get('mitigation', {})
+        bias_payload = {
+            "fairness_score": result.get('fairness_score', 100.0),
+            "gender_bias": result.get('gender_bias', {}),
+            "age_bias": {},
+            "race_bias": {},
+            "education_bias": {}
+        }
+
+        impact = generate_impact_statement(bias_payload)
+        plan = generate_fix_plan(bias_payload)
+
+        before = result.get('before', {})
+        after = mitigation_result.get('after', {})
+        improvement = mitigation_result.get('improvement', 'Mitigation completed.')
+        risk_transition = mitigation_result.get('risk_transition', 'No change')
+
+        before_level = before.get('bias_level', before.get('bias_summary', {}).get('bias_level', 'Unknown'))
+        after_level = after.get('risk_level', after.get('bias_level', 'Unknown'))
+        fairness_before = before.get('fairness_score', result.get('fairness_score', 0.0))
+        fairness_after = after.get('fairness_score', fairness_before)
+        human_summary = (
+            f"The dataset audit showed bias in {before_level}. "
+            f"After mitigation, risk moved from {before_level} to {after_level} and fairness improved by {fairness_after - fairness_before:.2f}. "
+            f"This means the model is now safer to use but should remain monitored."
+        )
+
+        full_result = {
+            "audit": result.get('audit', {}),
+            "before": before,
+            "after": after,
+            "improvement": improvement,
+            "risk_transition": risk_transition,
+            "impact_statement": impact.get('impact', ''),
+            "recommendations": plan.get('fix_plan', []),
+            "human_summary": human_summary
+        }
+
+        History.create(
+            user_id=user_id,
+            op_type="full_analysis",
+            input_meta={"filename": filename, "dataset_info": result.get('dataset_info', {})},
+            output_results={
+                "fairness_before": fairness_before,
+                "fairness_after": fairness_after
+            }
+        )
+
+        logger.info(f"Full analysis completed for user {user_id}, before {fairness_before}, after {fairness_after}")
+        return jsonify(full_result)
+    except Exception as e:
+        logger.error(f"Full analysis failed for user {user_id}: {e}", exc_info=True)
         return jsonify({"error": str(e)}), 500
     finally:
         if os.path.exists(file_path):

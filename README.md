@@ -1,82 +1,388 @@
-# FairHire AI 🚀
+# FairHire AI — Bias Detection & Mitigation Platform 🚀
 
-FairHire AI is a state-of-the-art SaaS application built to enforce equitable hiring workflows, surface complex demographic bias patterns natively inside datasets, and process advanced candidate profiles utilizing massive-scale Machine Learning tools out-of-the-box. 
+[![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)](https://fairhire-ai.com)
+[![Backend](https://img.shields.io/badge/Backend-Flask%20%2B%20Python-red)](https://flask.palletsprojects.com/)
+[![Frontend](https://img.shields.io/badge/Frontend-React.js-blue)](https://react.dev/)
+[![Database](https://img.shields.io/badge/Database-MongoDB-green)](https://www.mongodb.com/)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
-![FairHire AI Dashboard](https://img.shields.io/badge/Status-Production_Ready-brightgreen)
-![React](https://img.shields.io/badge/Frontend-React.js-blue)
-![Flask](https://img.shields.io/badge/Backend-Flask_Python-red)
-![MongoDB](https://img.shields.io/badge/Database-MongoDB_Atlas-green)
+---
+
+## 🎯 Problem Statement
+
+Artificial intelligence is increasingly used for hiring decisions, loan approvals, and other critical life outcomes. However, **AI bias** remains a pervasive problem:
+
+- **Hiring:** ML models perpetuate historical discrimination based on gender, race, age
+- **Loans:** Algorithms deny credit to protected groups at higher rates
+- **Scale:** Biased decisions compound across millions of individuals
+
+**FairHire AI** solves this by detecting, mitigating, and explaining bias in AI systems before they cause harm.
+
+---
+
+## 💡 Solution
+
+FairHire AI is a comprehensive platform that:
+
+### 1. **Detects Bias** 🔍
+- Uploads any CSV dataset
+- Analyzes demographic disparities using fairness metrics
+- Identifies which features drive biased outcomes
+- Calculates fairness scores (0-100)
+
+### 2. **Fixes Bias** ⚙️
+- Applies reweighting, SMOTE oversampling, correlation removal
+- Optimizes decision thresholds per demographic group
+- Ensures accuracy doesn't suffer significantly from mitigation
+- Rolls back unsafe changes automatically
+
+### 3. **Explains Decisions** 📊
+- Uses SHAP (Shapley Additive Explanations) for per-instance interpretability
+- Shows which features contributed to each prediction
+- Flags sensitive attributes that influenced decisions
+- Provides human-readable summaries
+
+### 4. **Real-Time Firewall** 🛡️
+- Evaluates individual predictions for bias risk
+- Flags high-risk decisions before they're acted upon
+- Detects group disparities in real time
+- Provides actionable recommendations
 
 ---
 
 ## 🌟 Key Features
 
-### 1. **V3 Universal ML Fairness Engine & SHAP Explainability**
-Upload **any arbitrary CSV file**, and FairHire AI will structurally detect your target demographic natively! It autonomously scrubs missing components, scales categorical algorithms using advanced `sklearn` ColumnTransformers, and bridges raw matrix variances straight into **SHAP (Shapley Additive Explanations)**! See *exactly* what factors mathematically drove an applicant's success visually (e.g. `education: 0.32`).
-
-### 2. **Generative Candidate Analysis (Gemini 3.1 Pro)**
-The system intelligently bridges unstructured Word (`.docx`) and Acrobat (`.pdf`) resume variants—extracting skills natively and mapping them directly to strict tier scoring algorithms. The integrated **Google Gemini 3.1 Pro** model natively constructs pristine executive demographic summaries dynamically!
-
-### 3. **Intelligent Job Matching**
-FairHire AI maps isolated candidate JSON variables structurally across real-world enterprise architectures leveraging the Adzuna intelligence API—linking remote jobs directly to users based on calculated score constraints and location targeting parameters. 
-
-### 4. **Military-Grade Security Hardening**
-* **MongoDB Rolling Rate Limiters:** Flask natively calculates 60-second execution boundaries shielding internal workers from unauthenticated API scraping overloads via ephemeral Atlas tracking. 
-* **HttpOnly Session Cookies:** Cross-Site Scripting (XSS) leaks are intrinsically walled off as React securely accepts global `SameSite=Lax` cookie bindings without relying on primitive `localStorage` JSON blobs.
-* **Zip-Bomb Safety Buffers:** Infinite looping payload anomalies masking as XML bombs are forcefully eradicated mid-stream by capping internal PDF text-buffers natively.
+| Feature | Description |
+|---------|-------------|
+| **Dataset Audit** | Comprehensive data quality and bias pre-flight checks |
+| **Bias Detection** | Advanced fairness metrics (demographic parity, equalized odds, disparate impact) |
+| **Bias Mitigation** | Multi-step mitigation pipeline with safety rollback |
+| **Explainability** | SHAP-based instance-level feature importance |
+| **Bias Firewall** | Real-time prediction monitoring and flagging |
+| **Full Analysis** | Single-endpoint orchestration of entire bias lifecycle |
+| **Gemini AI** | NLP-powered summaries and recommendations |
+| **User Management** | JWT authentication, rate limiting, audit logs |
 
 ---
 
 ## 🛠️ Technology Stack
 
-* **Frontend:** React (Context API, Lucide Icons, Axios Interceptors)
-* **Backend:** Flask / Python 3 / Flask-JWT-Extended
-* **Machine Learning:** `scikit-learn` (Generic AI mapping), `shap` (Feature Explainability), `pandas`
-* **Generative NLP:** Google GenAI SDK (Gemini 3.1 Pro Preview)
-* **Database Platform:** MongoDB Atlas
+### Backend
+- **Framework:** Flask (Python 3.10+)
+- **ML:** scikit-learn, pandas, numpy
+- **Fairness:** SHAP, custom fairness metrics
+- **Bias Mitigation:** imbalanced-learn (SMOTE), scipy
+- **Database:** MongoDB Atlas
+- **Auth:** Flask-JWT-Extended, bcrypt
+- **AI:** Google GenAI SDK (Gemini 3.1 Pro)
+
+### Frontend
+- **Framework:** React 18 (Context API for state)
+- **Styling:** Tailwind CSS, PostCSS
+- **HTTP:** Axios with interceptors
+- **Icons:** Lucide React
+- **File Upload:** React Dropzone
+
+### Deployment
+- **Backend:** Gunicorn on Render
+- **Frontend:** React static build on Render/Netlify
+- **Database:** MongoDB Atlas (serverless)
+- **Environment:** `.env` file for secrets
 
 ---
 
-## 💻 Running Locally
+## 🚀 Quick Start
 
-### 1. Requirements
-* PyMongo (must support Atlas DNS sequences via `pymongo[srv]`)
-* Node.js v16+
-* Python 3.10+
+### Prerequisites
+- Python 3.10+
+- Node.js 16+
+- MongoDB Atlas account
+- Google GenAI API key
 
-### 2. Environment Variables (.env)
-Clone the repository and add the following keys to a root `.env` string:
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/fairhire-ai.git
+   cd fairhire-ai
+   ```
+
+2. **Backend setup**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
+
+3. **Environment configuration**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your credentials:
+   # - MONGO_URI
+   # - GEMINI_API_KEY
+   # - JWT_SECRET_KEY
+   ```
+
+4. **Frontend setup**
+   ```bash
+   cd frontend-react
+   npm install
+   npm run build
+   cd ..
+   ```
+
+5. **Run locally**
+   ```bash
+   # Terminal 1: Backend
+   python app.py
+   
+   # Terminal 2: Frontend (for development)
+   cd frontend-react
+   npm start
+   ```
+
+Visit `http://localhost:3000` and the API at `http://localhost:5000`.
+
+---
+
+## 📡 API Endpoints
+
+### Core Analysis
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/analyze` | POST | Detect bias in dataset |
+| `/mitigate` | POST | Run bias mitigation pipeline |
+| `/full-analysis` | POST | Complete bias lifecycle (audit → detect → mitigate → explain) |
+
+### Supporting
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/firewall` | POST | Real-time bias risk evaluation for predictions |
+| `/auth/register` | POST | Create user account |
+| `/auth/login` | POST | Login with email/password |
+| `/profile` | GET/PUT/DELETE | Manage user profile |
+| `/resume/analyze` | POST | Extract and score resume |
+| `/jobs` | GET | Search jobs (Adzuna API) |
+
+### Example Request: Full Analysis
 ```bash
-SECRET_KEY=your_secure_string_here
-MONGO_URI=mongodb+srv://<auth>@your_atlas_cluster.mongodb.net/?appName=appName
-GEMINI_API_KEY=your_gemini_token
-ADZUNA_APP_ID=adzuna_id
-ADZUNA_APP_KEY=adzuna_key
+curl -X POST http://localhost:5000/full-analysis \
+  -H "Authorization: Bearer <TOKEN>" \
+  -F "file=@dataset.csv" \
+  -F "sensitive_columns=gender,race,age"
 ```
 
-### 3. Application Start Sequence
-Run the native builder to launch everything over dual developer ports quickly:
-```bash
-# 1. Boot the Flask Core Route
-python -m pip install -r requirements.txt
-python app.py
-
-# 2. Boot the React GUI Application
-cd frontend-react
-npm install
-npm start
+### Example Response
+```json
+{
+  "audit": {
+    "warnings": [],
+    "summary": "Dataset passed audit",
+    "severity": "INFO"
+  },
+  "before": {
+    "fairness_score": 42,
+    "bias_level": "High Risk",
+    "accuracy": 0.78
+  },
+  "after": {
+    "fairness_score": 68,
+    "bias_level": "Moderate Risk",
+    "accuracy": 0.76
+  },
+  "improvement": "Mitigation completed with 4 steps",
+  "risk_transition": "High Risk → Moderate Risk",
+  "impact_statement": "This model reduces selection chances for females by 22%",
+  "recommendations": [
+    "Rebalance dataset for underrepresented groups",
+    "Review feature selection for proxies",
+    "Adjust model decision thresholds"
+  ]
+}
 ```
 
 ---
 
-## ☁️ Deployment (Render / Heroku)
+## 🏗️ Project Structure
 
-This application has been successfully decoupled into a robust static monolith! Python natively consumes and hosts the unified React GUI framework meaning you only configure one cloud service! 
+```
+fairhire-ai/
+├── app.py                 # Main Flask application
+├── bias_detector.py       # Bias analysis orchestration
+├── gemini_helper.py       # Gemini API integration
+├── config.py              # Configuration & environment
+├── database.py            # MongoDB operations
+├── auth.py                # JWT authentication
+├── requirements.txt       # Python dependencies
+├── Procfile               # Render deployment config
+├── build.sh               # Build script
+│
+├── ml/
+│   ├── pipeline.py        # ML training & fairness scoring
+│   └── __init__.py
+│
+├── services/
+│   ├── dataset_auditor.py # Pre-flight data quality checks
+│   ├── mitigation.py      # Bias mitigation engine
+│   ├── explainer.py       # SHAP-based explanations
+│   ├── bias_firewall.py   # Real-time bias detection
+│   ├── cache.py           # Model caching
+│   ├── workflow.py        # Mitigation orchestration
+│   └── __init__.py
+│
+├── fairness/
+│   ├── metrics.py         # Fairness metric computations
+│   ├── scoring.py         # Overall fairness scoring
+│   └── __init__.py
+│
+├── frontend-react/
+│   ├── public/
+│   ├── src/
+│   │   ├── components/    # React components
+│   │   ├── contexts/      # Auth/state contexts
+│   │   ├── App.js
+│   │   └── index.js
+│   ├── package.json
+│   └── tailwind.config.js
+│
+└── README.md              # This file
+```
 
-1. Create a **New Web Service** inside Render.com.
-2. Link your current Github branch directly!
-3. **Build Command:** `./build.sh`
-4. **Start Command:** `gunicorn app:app`
-5. Inject the `.env` parameters explicitly into the web portal. 
+---
 
-*FairHire AI — Empowering equitable sourcing decisions at absolute scale.*
+## 🧪 Testing
+
+### Manual Testing
+```bash
+# Test bias detection
+curl -X POST http://localhost:5000/analyze \
+  -H "Authorization: Bearer <TOKEN>" \
+  -F "file=@test_data.csv"
+
+# Test full pipeline
+curl -X POST http://localhost:5000/full-analysis \
+  -H "Authorization: Bearer <TOKEN>" \
+  -F "file=@test_data.csv"
+```
+
+---
+
+## 🚢 Deployment
+
+### Deploy to Render
+
+1. **Connect GitHub repository to Render**
+2. **Set environment variables:**
+   - `MONGO_URI`
+   - `GEMINI_API_KEY`
+   - `JWT_SECRET_KEY`
+   - `FLASK_ENV=production`
+
+3. **Configure build command:**
+   ```bash
+   bash build.sh
+   ```
+
+4. **Configure start command:**
+   ```bash
+   gunicorn app:app
+   ```
+
+5. **Deploy**
+   - Render auto-deploys on `git push origin main`
+
+---
+
+## 📊 How It Works
+
+### Bias Detection Pipeline
+1. **Load Data:** Parse CSV, validate structure
+2. **Audit:** Check for quality issues, missing values, class imbalance
+3. **Train Model:** Logistic regression or Random Forest
+4. **Compute Fairness:** Calculate demographic parity, equalized odds, disparate impact
+5. **Generate Summary:** Human-readable insights
+
+### Bias Mitigation Pipeline
+1. **Baseline:** Establish current performance/fairness
+2. **Correlation Removal:** De-correlate features from sensitive attributes
+3. **SMOTE:** Oversample underrepresented groups
+4. **Reweighting:** Adjust sample weights by group
+5. **Threshold Optimization:** Find group-specific decision boundaries
+6. **Rollback:** If accuracy drops > threshold, revert to baseline
+7. **Post-Evaluation:** Re-compute fairness on mitigated model
+
+### Explainability Flow
+1. **SHAP Values:** Compute Shapley values for each feature
+2. **Feature Contributions:** Quantify impact of each attribute
+3. **Sensitive Flag:** Alert if protected attributes influenced decision
+4. **Human Summary:** Generate natural language explanation
+
+---
+
+## 🔐 Security
+
+- **Password Hashing:** bcrypt with salt
+- **JWT Tokens:** HttpOnly, SameSite=Lax cookies
+- **Rate Limiting:** MongoDB-backed, 10 requests per 60 seconds per user
+- **Input Validation:** File size limits, MIME type checking
+- **File Cleanup:** Automatic removal of old uploads
+- **Environment Secrets:** `.env` file (never committed)
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## 📈 Future Scope
+
+- **Real-Time Monitoring:** Dashboard for ongoing bias drift detection
+- **Enterprise Integration:** SSO, SAML, audit logging
+- **Custom Metrics:** Allow users to define fairness objectives
+- **Model Registry:** Version control for trained models
+- **Batch Processing:** Asynchronous analysis jobs
+- **Webhooks:** Integration with ATS systems (Workday, Greenhouse, etc.)
+- **Compliance Reports:** GDPR, CCPA, EO-compliant audits
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 👥 Authors
+
+- **Your Name** — Full Stack Engineer
+
+---
+
+## 📞 Support
+
+For questions or issues:
+- Open an issue on GitHub
+- Email: support@fairhire-ai.com
+- Documentation: [https://docs.fairhire-ai.com](https://docs.fairhire-ai.com)
+
+---
+
+## 🙏 Acknowledgments
+
+- [scikit-learn](https://scikit-learn.org/) for ML framework
+- [SHAP](https://github.com/slundberg/shap) for explainability
+- [MongoDB](https://www.mongodb.com/) for database
+- [Gemini API](https://ai.google.dev/) for AI summaries
+- [React](https://react.dev/) for frontend framework
+
+---
+
+**Made with ❤️ for fair hiring and equitable AI**

@@ -22,23 +22,22 @@ def _build_prompt(bias_data: Dict[str, Any]) -> str:
     return f"""
 You are a senior AI fairness auditor working for a global hiring platform.
 
-Your task is to analyze bias data and produce high-quality, expert-level recommendations.
+Your task is to analyze bias data and produce concise, actionable recommendations suitable for a hiring operations team.
 
 Bias Data:
 {bias_data}
 
 Output Requirements:
-- Provide 5 recommendations
-- Each must be specific, actionable, and industry-relevant
-- Avoid generic advice
-- Focus on hiring pipelines, ML fairness, and bias mitigation strategies
-- Keep each point concise (1–2 lines max)
-- Use professional tone
+- Provide 5 specific, actionable recommendations
+- Avoid generic or academic language
+- Focus on fairness, compliance, and hiring process fixes
+- Keep each recommendation short (1–2 lines)
+- Use clear, plain English
 
 Also:
 - If bias is severe → suggest strict interventions
-- If moderate → suggest optimization strategies
-- If low → suggest monitoring and governance
+- If moderate → suggest tuning and monitoring
+- If low → suggest governance and review
 """
 
 
@@ -124,18 +123,18 @@ def generate_detailed_summary(bias_data: Dict[str, Any]) -> Dict[str, Any]:
         client = genai.Client(api_key=api_key)
 
         prompt = f"""
-You are an AI fairness expert.
+You are an AI fairness expert writing for a hiring leader.
 
-Generate a detailed, professional summary explaining the bias situation.
+Generate a short, professional summary of the bias situation.
 
 Bias Data:
 {bias_data}
 
 Rules:
-- Write exactly 2 to 3 well-structured paragraphs
-- Clear and executive-level language
-- Mention severity of bias
-- Highlight key concern areas
+- Write 2 to 3 short paragraphs
+- Use clear, human language
+- Mention severity and key concerns
+- Include one sentence about next steps
 - Avoid technical jargon
 """
 
@@ -180,7 +179,7 @@ def generate_bias_explanation(bias_data: Dict[str, Any]) -> Dict[str, Any]:
         client = genai.Client(api_key=api_key)
 
         prompt = f"""
-Explain the bias findings in bullet points.
+Explain the bias findings in simple bullet points for a hiring operations team.
 
 Bias Data:
 {bias_data}
@@ -189,6 +188,7 @@ Rules:
 - Provide 3–5 short bullet points
 - Highlight which groups are affected
 - Keep it simple and clear
+- Use plain English and avoid technical terms
 """
 
         response = client.models.generate_content(
@@ -205,6 +205,141 @@ Rules:
     except Exception as e:
         logger.error(f"Gemini explanation error: {e}")
         return {"explanations": _generate_offline_explanation(bias_data), "ai_used": False}
+
+
+def _generate_offline_impact_statement(bias_data: Dict[str, Any]) -> str:
+    if bias_data.get('gender_bias'):
+        return "This model reduces selection chances for underrepresented gender groups and requires immediate fairness validation."
+    if bias_data.get('race_bias'):
+        return "This model reduces selection chances for specific racial groups and should be reviewed for demographic fairness."
+    if bias_data.get('age_bias'):
+        return "This model reduces selection chances for certain age groups and may violate age discrimination protections."
+    return "The model shows limited bias signals, but monitoring is advised to maintain fair hiring outcomes."
+
+
+def _generate_offline_compliance_report(bias_data: Dict[str, Any]) -> str:
+    score = bias_data.get('fairness_score', 100)
+    risk = "high" if score < 50 else "moderate" if score < 80 else "low"
+    report = f"Risk level: {risk}. "
+    if bias_data.get('gender_bias'):
+        report += "Potential gender bias is present, which can attract regulatory scrutiny and harm diversity goals. "
+    if bias_data.get('race_bias'):
+        report += "Racial disparities were observed, which may violate equal opportunity standards. "
+    if bias_data.get('age_bias'):
+        report += "Age-based differences were identified, raising compliance concerns for fair employment. "
+    report += "Review these gaps with your legal and HR teams and document remediation steps."
+    return report
+
+
+def _generate_offline_fix_plan(bias_data: Dict[str, Any]) -> List[str]:
+    plan = [
+        "Rebalance dataset",
+        "Review feature selection for proxies",
+        "Adjust model decision thresholds"
+    ]
+    if bias_data.get('gender_bias') or bias_data.get('race_bias') or bias_data.get('age_bias'):
+        plan.append("Add targeted bias monitoring")
+    return plan
+
+
+def generate_impact_statement(bias_data: Dict[str, Any]) -> Dict[str, Any]:
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not GEMINI_AVAILABLE or not api_key:
+        return {"impact": _generate_offline_impact_statement(bias_data), "ai_used": False}
+
+    try:
+        client = genai.Client(api_key=api_key)
+        prompt = f"""
+You are a fairness auditor writing for HR and compliance.
+
+Create one sentence that explains the real-world impact of the bias data.
+
+Bias Data:
+{bias_data}
+
+Rules:
+- Write exactly one clear sentence
+- Use plain English
+- Focus on the candidate impact or group disadvantage
+"""
+        response = client.models.generate_content(
+            model="gemini-3.1-pro-preview",
+            contents=prompt
+        )
+        impact = response.text.strip()
+        if not impact:
+            return {"impact": _generate_offline_impact_statement(bias_data), "ai_used": False}
+        return {"impact": impact, "ai_used": True}
+    except Exception as e:
+        logger.error(f"Gemini impact error: {e}")
+        return {"impact": _generate_offline_impact_statement(bias_data), "ai_used": False}
+
+
+def generate_compliance_report(bias_data: Dict[str, Any]) -> Dict[str, Any]:
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not GEMINI_AVAILABLE or not api_key:
+        return {"report": _generate_offline_compliance_report(bias_data), "ai_used": False}
+
+    try:
+        client = genai.Client(api_key=api_key)
+        prompt = f"""
+You are a compliance advisor for a hiring platform.
+
+Write a short compliance report in plain language that explains the risk, fairness concern, and next review step.
+
+Bias Data:
+{bias_data}
+
+Rules:
+- Keep it to 3 or 4 sentences
+- Use clear, simple wording
+- Mention risk and fairness gap
+- Include a high-level action recommendation
+"""
+        response = client.models.generate_content(
+            model="gemini-3.1-pro-preview",
+            contents=prompt
+        )
+        report = response.text.strip()
+        if not report:
+            return {"report": _generate_offline_compliance_report(bias_data), "ai_used": False}
+        return {"report": report, "ai_used": True}
+    except Exception as e:
+        logger.error(f"Gemini compliance error: {e}")
+        return {"report": _generate_offline_compliance_report(bias_data), "ai_used": False}
+
+
+def generate_fix_plan(bias_data: Dict[str, Any]) -> Dict[str, Any]:
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not GEMINI_AVAILABLE or not api_key:
+        return {"fix_plan": _generate_offline_fix_plan(bias_data), "ai_used": False}
+
+    try:
+        client = genai.Client(api_key=api_key)
+        prompt = f"""
+You are a fairness engineer.
+
+List 3 concise, actionable steps to reduce bias in the model and dataset based on this bias data.
+
+Bias Data:
+{bias_data}
+
+Rules:
+- Provide exactly 3 short actions
+- Use plain language
+- Keep each action under 6 words
+"""
+        response = client.models.generate_content(
+            model="gemini-3.1-pro-preview",
+            contents=prompt
+        )
+        plan = _clean_response(response.text)
+        if not plan:
+            return {"fix_plan": _generate_offline_fix_plan(bias_data), "ai_used": False}
+        return {"fix_plan": plan, "ai_used": True}
+    except Exception as e:
+        logger.error(f"Gemini fix plan error: {e}")
+        return {"fix_plan": _generate_offline_fix_plan(bias_data), "ai_used": False}
 
 
 def _generate_offline_resume_summary(resume_text: str) -> str:
