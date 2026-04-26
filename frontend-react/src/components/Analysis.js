@@ -13,6 +13,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import GuidedStepper from "./GuidedStepper";
+import FeatureImportance from "./FeatureImportance";
 
 const STEP_UPLOAD = 1;
 const STEP_ANALYZE = 2;
@@ -578,6 +579,14 @@ const Analysis = () => {
                 </div>
               </div>
             )}
+
+            <FeatureImportance
+              shapSummary={results.shap_summary}
+              biasByFeature={results.bias_by_feature}
+              selectionRates={results.selection_rates}
+              fairnessScore={results.fairness_score}
+              biasLevel={results.bias_level}
+            />
 
             {results.recommendations && results.recommendations.length > 0 && (
               <div className="card">
